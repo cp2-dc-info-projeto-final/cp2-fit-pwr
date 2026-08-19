@@ -20,6 +20,15 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_role_valid CHECK (role IN ('admin', 'user', 'professor')) -- tipos de usuário
 );
 
+CREATE TABLE professor (
+
+    id bigint GENERATED ALWAYS AS IDENTITY,
+    nome text NOT NULL,
+    senha text NOT NULL,
+    aulas text NOT NULL
+
+)
+
 INSERT INTO usuario (login, email, senha, horario, role ) VALUES
 -- senha efelantinho
 ('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manhã', 'admin'),
