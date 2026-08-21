@@ -1,36 +1,36 @@
 <script lang="ts">
-  // Tabela de professores
+  // Tabela de modalidades
   
   import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Card } from 'flowbite-svelte'; // UI
   import ConfirmModal from './ConfirmModal.svelte'; // modal de confirmação
-  import { UserEditOutline, TrashBinOutline } from 'flowbite-svelte-icons'; // ícones
+  import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons'; // ícones genéricos mais adequados
   import { goto } from '$app/navigation'; // navegação
   import api from '$lib/api'; // API backend
   import type { ApiResponse } from '$lib/api';
   import { onMount } from 'svelte'; // ciclo de vida
-  import type { User } from '$lib/models/User';
+  import type { Modality } from '$lib/models/Modality'; // Ajuste o caminho se necessário
 
-  let users: User[] = []; // lista de professores filtrados
+  let modalities: Modality[] = []; // lista de modalidades
   let loading = true;
   let error = '';
   let deletingId: number | null = null; // id em deleção
-  let confirmOpen = false; //
+  let confirmOpen = false; // modal aberto?
   let confirmTargetId: number | null = null; // id alvo do modal
   let filtro = "";
 
-  async function filtraProfessores(){
+  async function filtraModalidades(){
     try {
-      const res = await api.get(`/users?login=${encodeURIComponent(filtro)}`);
-      const body = res.data as ApiResponse<User[]>;
+      const res = await api.get(`/modalidades?nome=${encodeURIComponent(filtro)}`);
+      const body = res.data as ApiResponse<Modality[]>;
       if (body.success) {
-        users = (body.data ?? []).filter(user => user.role === 'professor');
+        modalities = body.data ?? [];
       } else {
         error = body.message;
       }
     } catch (e: any) {
-      console.error('Erro ao carregar professores:', e);
-      const body = e.response?.data as ApiResponse<User[]> | undefined;
-      error = body?.message || 'Erro ao carregar professores';
+      console.error('Erro ao carregar modalidades:', e);
+      const body = e.response?.data as ApiResponse<Modality[]> | undefined;
+      error = body?.message || 'Erro ao carregar modalidades';
     } finally {
       loading = false;
     }
@@ -64,17 +64,17 @@
     deletingId = id;
     error = '';
     try {
-      const res = await api.delete(`/users/${id}`);
+      const res = await api.delete(`/modalidades/${id}`);
       const body = res.data as ApiResponse<null>;
       if (!body.success) {
         error = body.message;
         return;
       }
-      users = users.filter(user => user.id !== id);
+      modalities = modalities.filter(modality => modality.id !== id);
     } catch (e: any) {
-      console.error('Erro ao deletar professor:', e);
+      console.error('Erro ao deletar modalidade:', e);
       const body = e.response?.data as ApiResponse<null> | undefined;
-      error = body?.message || 'Erro ao remover professor.';
+      error = body?.message || 'Erro ao remover modalidade.';
     } finally {
       deletingId = null;
     }
@@ -82,18 +82,17 @@
 
   onMount(async () => {
     try {
-      const res = await api.get('/users');
-      const body = res.data as ApiResponse<User[]>;
+      const res = await api.get('/modalidades');
+      const body = res.data as ApiResponse<Modality[]>;
       if (body.success) {
-        // Filtra para exibir apenas professores no carregamento inicial
-        users = (body.data ?? []).filter(user => user.role === 'professor');
+        modalities = body.data ?? [];
       } else {
         error = body.message;
       }
     } catch (e: any) {
-      console.error('Erro ao carregar professores:', e);
-      const body = e.response?.data as ApiResponse<User[]> | undefined;
-      error = body?.message || 'Erro ao carregar professores';
+      console.error('Erro ao carregar modalidades:', e);
+      const body = e.response?.data as ApiResponse<Modality[]> | undefined;
+      error = body?.message || 'Erro ao carregar modalidades';
     } finally {
       loading = false;
     }
@@ -101,54 +100,50 @@
 </script>
 
 {#if loading}
-  <div class="my-8 text-center text-gray-500">Carregando professores...</div>
+  <div class="my-8 text-center text-gray-500">Carregando modalidades...</div>
 {:else if error}
   <div class="my-8 text-center text-red-500">{error}</div>
 {:else}
   <!-- Tabela para telas médias/grandes -->
   <div class="hidden xl:block">
-    <!-- Busca de professores -->
+    <!-- Busca de modalidades -->
     <div class="w-full max-w-5xl mx-auto mb-2 flex justify-start">
       <input 
         type="search" 
         id="busca" 
-        placeholder="Digite o nome do professor" 
+        placeholder="Digite o nome da modalidade" 
         bind:value={filtro} 
-        on:input={filtraProfessores}
+        on:input={filtraModalidades}
         class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
       >
     </div>
-
+    
     <Table class="w-full max-w-5xl mx-auto my-4 shadow-lg border border-gray-200 rounded-lg">
       <TableHead>
-        <TableHeadCell class="w-16">ID</TableHeadCell>
-        <TableHeadCell class="w-48">Login</TableHeadCell>
-        <TableHeadCell class="min-w-0">Email</TableHeadCell>
-        <TableHeadCell class="min-w-0">Horário</TableHeadCell>
+        <TableHeadCell class="w-24">ID</TableHeadCell>
+        <TableHeadCell class="min-w-0">Nome da Modalidade</TableHeadCell>
         <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
       </TableHead>
       <TableBody>
-        {#each users as user}
+        {#each modalities as modality}
           <TableBodyRow>
-            <TableBodyCell>{user.id}</TableBodyCell>
-            <TableBodyCell>{user.login}</TableBodyCell>
-            <TableBodyCell class="truncate max-w-0">{user.email}</TableBodyCell>
-            <TableBodyCell class="truncate max-w-0">{user.horario || 'Não informado'}</TableBodyCell>
+            <TableBodyCell>{modality.id}</TableBodyCell>
+            <TableBodyCell class="font-medium text-gray-900">{modality.nome}</TableBodyCell>
             <TableBodyCell>
               <!-- Botão editar -->
               <button
                 class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
                 title="Editar"
-                on:click={() => goto(`/users/edit/${user.id}`)}
+                on:click={() => goto(`/modalidades/edit/${modality.id}`)}
               >
-                <UserEditOutline class="w-5 h-5 text-primary-500" />
+                <EditOutline class="w-5 h-5 text-primary-500" />
               </button>
               <!-- Botão remover -->
               <button
                 title="Remover"
                 class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(user.id)}
-                disabled={deletingId === user.id || loading}
+                on:click={() => openConfirm(modality.id)}
+                disabled={deletingId === modality.id || loading}
               >
                 <TrashBinOutline class="w-5 h-5 text-red-400" />
               </button>
@@ -165,49 +160,40 @@
       <input 
         type="search" 
         id="busca-mobile" 
-        placeholder="Digite o nome do professor" 
+        placeholder="Digite o nome da modalidade" 
         bind:value={filtro} 
-        on:input={filtraProfessores}
+        on:input={filtraModalidades}
         class="w-full max-w-sm border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
       >
     </div>
 
     <div class="flex flex-col items-center gap-4 my-4 max-w-3xl mx-auto md:grid md:grid-cols-2">
-      {#each users as user}
-        <!-- Card do professor -->
+      {#each modalities as modality}
+        <!-- Card de modalidade -->
         <Card class="max-w-sm w-full p-0 overflow-hidden shadow-lg border border-gray-200">
-          <div class="px-4 pt-4 pb-2 bg-gray-100 text-left flex items-center justify-between">
+          <div class="px-4 py-4 bg-gray-100 text-left flex items-center justify-between">
             <div>
-              <div class="text-lg font-semibold text-gray-800 text-left">{user.login}</div>
-              <div class="text-xs text-gray-400 text-left">ID: {user.id}</div>
+              <div class="text-xs text-gray-400 text-left">ID: {modality.id}</div>
+              <div class="text-lg font-semibold text-gray-800 text-left mt-0.5">{modality.nome}</div>
             </div>
             <div class="flex gap-2">
               <!-- Botão editar -->
               <button
                 class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
                 title="Editar"
-                on:click={() => goto(`/users/edit/${user.id}`)}
+                on:click={() => goto(`/modalidades/edit/${modality.id}`)}
               >
-                <UserEditOutline class="w-5 h-5 text-primary-500" />
+                <EditOutline class="w-5 h-5 text-primary-500" />
               </button>
               <!-- Botão remover -->
               <button
                 title="Remover"
                 class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(user.id)}
-                disabled={deletingId === user.id || loading}
+                on:click={() => openConfirm(modality.id)}
+                disabled={deletingId === modality.id || loading}
               >
                 <TrashBinOutline class="w-5 h-5 text-red-400" />
               </button>
-            </div>
-          </div>
-          <div class="px-4 pb-4 pt-2 flex flex-col gap-2 text-left">
-            <div class="flex items-center gap-2 text-left">
-              <svg class="w-4 h-4 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 12A4 4 0 1 0 8 12a4 4 0 0 0 8 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7m-7-7v7m14-7v7"/></svg>
-              <span class="text-gray-700 text-sm truncate">{user.email}</span>
-            </div>
-            <div class="text-xs text-gray-500">
-              Horário: {user.horario || 'Não informado'}
             </div>
           </div>
         </Card>
@@ -219,7 +205,7 @@
 <!-- Modal de confirmação -->
 <ConfirmModal
   open={confirmOpen}
-  message="Tem certeza que deseja remover este professor?"
+  message="Tem certeza que deseja remover esta modalidade?"
   confirmText="Remover"
   cancelText="Cancelar"
   onConfirm={handleConfirm}
