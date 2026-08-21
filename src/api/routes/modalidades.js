@@ -24,7 +24,7 @@ router.get('/', verifyToken, async function(req, res) {
   try {
     const { nome } = req.query;
 
-    let query = 'SELECT id, nome, descricao, preco, status FROM modalidade';
+    let query = 'SELECT id_modalidade, nome FROM modalidade';
     let params = [];
 
     if (nome && nome.trim() !== '') {
@@ -48,7 +48,7 @@ router.get('/:id', verifyToken, async function(req, res) {
     const { id } = req.params;
 
     const result = await pool.query(
-      'SELECT id, nome, descricao, preco, status FROM modalidade WHERE id = $1',
+      'SELECT id_modalidade, nome FROM modalidade WHERE id_modalidade = $1',
       [id]
     );
 
@@ -56,7 +56,7 @@ router.get('/:id', verifyToken, async function(req, res) {
       return sendError(res, 404, 'Modalidade não encontrada');
     }
 
-    return sendSuccess(res, 200, null, result.rows[0]);
+    return sendSuccess(res, 200, null, result.rows);
   } catch (error) {
     console.error('Erro ao buscar modalidade:', error);
     return sendError(res, 500, 'Erro interno do servidor');
@@ -66,19 +66,17 @@ router.get('/:id', verifyToken, async function(req, res) {
 /* POST - Criar nova modalidade (Apenas Admin) */
 router.post('/', verifyToken, isAdmin, async function(req, res) {
   try {
-    const { nome, descricao, preco, status = 'ativo' } = req.body;
+    const { nome } = req.body;
     
     // Validação básica
-    if (!nome || typeof preco === 'undefined') {
-      const errors = [];
-      if (!nome) errors.push({ field: 'nome', message: 'Nome é obrigatório', code: 'REQUIRED' });
-      if (typeof preco === 'undefined') errors.push({ field: 'preco', message: 'Preço é obrigatório', code: 'REQUIRED' });
-
-      return sendError(res, 400, 'Campos obrigatórios em falta', errors);
+    if (!nome || nome.trim() === '') {
+      return sendError(res, 400, 'Campos obrigatórios em falta', [
+        { field: 'nome', message: 'Nome é obrigatório', code: 'REQUIRED' }
+      ]);
     }
     
     // Verificar duplicados
-    const existingModalidade = await pool.query('SELECT id FROM modalidade WHERE nome = $1', [nome]);
+    const existingModalidade = await pool.query('SELECT id_modalidade FROM modalidade WHERE nome = $1', [nome]);
     if (existingModalidade.rows.length > 0) {
       return sendError(res, 409, 'Esta modalidade já está registada', [
         { field: 'nome', message: 'Nome já está em uso', code: 'CONFLICT' }
@@ -86,16 +84,13 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
     }
 
     const result = await pool.query(
-      'INSERT INTO modalidade (nome, descricao, preco, status) VALUES ($1, $2, $3, $4) RETURNING id, nome, descricao, preco, status',
-      [nome, descricao, preco, status]
+      'INSERT INTO modalidade (nome) VALUES ($1) RETURNING id_modalidade, nome',
+      [nome]
     );
 
-    return sendSuccess(res, 201, 'Modalidade criada com sucesso', result.rows[0]);
+    return sendSuccess(res, 201, 'Modalidade criada com sucesso', result.rows);
   } catch (error) {
     console.error('Erro ao criar modalidade:', error);
-    if (error.code === '23514') {
-      return sendError(res, 400, 'Dados inválidos. Verifique as restrições da base de dados.');
-    }
     return sendError(res, 500, 'Erro interno do servidor');
   }
 });
@@ -104,26 +99,27 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
 router.put('/:id', verifyToken, isAdmin, async function(req, res) {
   try {
     const { id } = req.params;
-    const { nome, descricao, preco, status } = req.body;
+    const { nome } = req.body;
+
+    if (!nome || nome.trim() === '') {
+      return sendError(res, 400, 'Nome é obrigatório para atualização');
+    }
 
     // Verificar se existe
-    const exists = await pool.query('SELECT id FROM modalidade WHERE id = $1', [id]);
+    const exists = await pool.query('SELECT id_modalidade FROM modalidade WHERE id_modalidade = $1', [id]);
     if (exists.rows.length === 0) {
       return sendError(res, 404, 'Modalidade não encontrada');
     }
 
     const result = await pool.query(
       `UPDATE modalidade 
-       SET nome = COALESCE($1, nome), 
-           descricao = COALESCE($2, descricao), 
-           preco = COALESCE($3, preco), 
-           status = COALESCE($4, status) 
-       WHERE id = $5 
-       RETURNING id, nome, descricao, preco, status`,
-      [nome, descricao, preco, status, id]
+       SET nome = $1 
+       WHERE id_modalidade = $2 
+       RETURNING id_modalidade, nome`,
+      [nome, id]
     );
 
-    return sendSuccess(res, 200, 'Modalidade atualizada com sucesso', result.rows[0]);
+    return sendSuccess(res, 200, 'Modalidade atualizada com sucesso', result.rows);
   } catch (error) {
     console.error('Erro ao atualizar modalidade:', error);
     return sendError(res, 500, 'Erro interno do servidor');
@@ -135,7 +131,7 @@ router.delete('/:id', verifyToken, isAdmin, async function(req, res) {
   try {
     const { id } = req.params;
 
-    const result = await pool.query('DELETE FROM modalidade WHERE id = $1 RETURNING id', [id]);
+    const result = await pool.query('DELETE FROM modalidade WHERE id_modalidade = $1 RETURNING id_modalidade', [id]);
 
     if (result.rows.length === 0) {
       return sendError(res, 404, 'Modalidade não encontrada');

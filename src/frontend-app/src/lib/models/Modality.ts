@@ -1,9 +1,9 @@
 export interface Modality {
-  id: number;
+  id_modalidade: number;
   nome: string;
 }
 
 export interface ModalityFormData {
-  id: number;
+  id_modalidade: number;
   nome: string;
 }

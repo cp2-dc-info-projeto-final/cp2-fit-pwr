@@ -70,7 +70,7 @@
         error = body.message;
         return;
       }
-      modalities = modalities.filter(modality => modality.id !== id);
+      modalities = modalities.filter(modality => modality.id_modalidade !== id);
     } catch (e: any) {
       console.error('Erro ao deletar modalidade:', e);
       const body = e.response?.data as ApiResponse<null> | undefined;
@@ -127,14 +127,14 @@
       <TableBody>
         {#each modalities as modality}
           <TableBodyRow>
-            <TableBodyCell>{modality.id}</TableBodyCell>
+            <TableBodyCell>{modality.id_modalidade}</TableBodyCell>
             <TableBodyCell class="font-medium text-gray-900">{modality.nome}</TableBodyCell>
             <TableBodyCell>
               <!-- Botão editar -->
               <button
                 class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
                 title="Editar"
-                on:click={() => goto(`/modalidades/edit/${modality.id}`)}
+                on:click={() => goto(`/modalidades/edit/${modality.id_modalidade}`)}
               >
                 <EditOutline class="w-5 h-5 text-primary-500" />
               </button>
@@ -142,8 +142,8 @@
               <button
                 title="Remover"
                 class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(modality.id)}
-                disabled={deletingId === modality.id || loading}
+                on:click={() => openConfirm(modality.id_modalidade)}
+                disabled={deletingId === modality.id_modalidade || loading}
               >
                 <TrashBinOutline class="w-5 h-5 text-red-400" />
               </button>
@@ -173,7 +173,7 @@
         <Card class="max-w-sm w-full p-0 overflow-hidden shadow-lg border border-gray-200">
           <div class="px-4 py-4 bg-gray-100 text-left flex items-center justify-between">
             <div>
-              <div class="text-xs text-gray-400 text-left">ID: {modality.id}</div>
+              <div class="text-xs text-gray-400 text-left">ID: {modality.id_modalidade}</div>
               <div class="text-lg font-semibold text-gray-800 text-left mt-0.5">{modality.nome}</div>
             </div>
             <div class="flex gap-2">
@@ -181,7 +181,7 @@
               <button
                 class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
                 title="Editar"
-                on:click={() => goto(`/modalidades/edit/${modality.id}`)}
+                on:click={() => goto(`/modalidades/edit/${modality.id_modalidade}`)}
               >
                 <EditOutline class="w-5 h-5 text-primary-500" />
               </button>
@@ -189,8 +189,8 @@
               <button
                 title="Remover"
                 class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(modality.id)}
-                disabled={deletingId === modality.id || loading}
+                on:click={() => openConfirm(modality.id_modalidade)}
+                disabled={deletingId === modality.id_modalidade || loading}
               >
                 <TrashBinOutline class="w-5 h-5 text-red-400" />
               </button>

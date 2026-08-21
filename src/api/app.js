@@ -8,6 +8,8 @@ var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var modalidadesRouter = require('./routes/modalidades');
+var turmasRouter = require('./routes/turmas');
 
 var app = express();
 
@@ -26,6 +28,8 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/modalidades', modalidadesRouter);
+app.use('/turmas', turmasRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

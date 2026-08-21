@@ -10,7 +10,8 @@
 
   export let id: number | null = null; // id da modalidade
 
-  let modality: ModalityFormData = { id: 0, nome: '' }; // dados do form
+  // Correção: Inicializa usando a estrutura correta (apenas nome para o formulário)
+  let modality: ModalityFormData = { nome: '' }; // dados do form
   
   let loading = false;
   let error = '';
@@ -26,15 +27,16 @@
       loading = true;
       try {
         const res = await api.get(`/modalidades/${id}`);
-        const body = res.data as ApiResponse<Modality>;
+        const body = res.data as ApiResponse<Modality[]>; // Correção: Backend agora retorna um array
         console.log(body);
-        if (body.success && body.data) {
-          modality = { ...body.data };
+        if (body.success && body.data && body.data.length > 0) {
+          // Correção: Acessa a primeira posição do array retornado pelo PG
+          modality = { nome: body.data[0].nome };
         } else {
           error = body.message;
         }
       } catch (e: any) {
-        const body = e.response?.data as ApiResponse<Modality> | undefined;
+        const body = e.response?.data as ApiResponse<Modality[]> | undefined;
         error = body?.message || 'Erro ao carregar modalidade.';
       } finally {
         loading = false;
@@ -49,11 +51,12 @@
     error = '';
     
     try {
-      const modalityData = { ...modality };
+      // Correção: Envia apenas o payload que o backend espera (nome)
+      const modalityData = { nome: modality.nome };
       
       if (id === null) {
         const res = await api.post('/modalidades', modalityData);
-        const body = res.data as ApiResponse<Modality>;
+        const body = res.data as ApiResponse<Modality[]>; // Correção: Tipado para array
         if (!body.success) {
           error = body.message;
           fieldErrors = body.errors;
@@ -61,7 +64,7 @@
         }
       } else {
         const res = await api.put(`/modalidades/${id}`, modalityData);
-        const body = res.data as ApiResponse<Modality>;
+        const body = res.data as ApiResponse<Modality[]>; // Correção: Tipado para array
         if (!body.success) {
           error = body.message;
           fieldErrors = body.errors;
@@ -70,7 +73,7 @@
       }
       goto('/modalidades');
     } catch (e: any) {
-      const body = e.response?.data as ApiResponse<Modality> | undefined;
+      const body = e.response?.data as ApiResponse<Modality[]> | undefined;
       error = body?.message || 'Erro ao salvar modalidade.';
       fieldErrors = body?.errors || [];
     } finally {
@@ -100,7 +103,7 @@
     <!-- Campo nome -->
     <div>
       <Label for="nome">Nome da Modalidade</Label>
-      <Input id="nome" bind:value={modality.nome} placeholder="Ex: Futebol, Natação..." required class="mt-1" />
+      <Input id="nome" bind:value={modality.nome} placeholder="Ex: musculação, ginástica..." required class="mt-1" />
       {#if errorOf('nome')}
         <div class="mt-1 text-sm text-red-500">{errorOf('nome')}</div>
       {/if}
