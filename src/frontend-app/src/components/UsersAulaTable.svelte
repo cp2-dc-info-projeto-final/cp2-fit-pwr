@@ -1,4 +1,4 @@
-script lang="ts">
+<script lang="ts">
     // Tabela de usuários
     
     import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Card, Badge } from 'flowbite-svelte'; // UI

@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS turma_aluno CASCADE;
 DROP TABLE IF EXISTS turma CASCADE;
 DROP TABLE IF EXISTS modalidade CASCADE;
 DROP TABLE IF EXISTS usuario CASCADE;
+DROP TABLE IF EXISTS aula CASCADE;
 
 CREATE TABLE usuario (
     id bigint GENERATED ALWAYS AS IDENTITY,
@@ -57,3 +58,25 @@ INSERT INTO usuario (login, email, senha, horario, role ) VALUES
 -- senha efelantinho
 ('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manhã', 'admin'),
 ('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','noite', 'user');
+
+CREATE TABLE aula (
+    id_aula BIGINT GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,
+    dia_semana TEXT NOT NULL,
+    horario TEXT NOT NULL,
+    id_usuario BIGINT NOT NULL,
+
+    CONSTRAINT pk_aula PRIMARY KEY (id_aula),
+    CONSTRAINT fk_aula_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+
+    CONSTRAINT ck_aula_dia_semana_valid
+        CHECK (dia_semana IN (
+            'segunda',
+            'terça',
+            'quarta',
+            'quinta',
+            'sexta',
+            'sábado',
+            'domingo'
+        ))
+);

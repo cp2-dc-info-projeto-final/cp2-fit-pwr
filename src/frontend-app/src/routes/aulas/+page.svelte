@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ProfessorTable from '../../components/ProfessorTable.svelte';
+	import UsersAulaTable from '../../components/UsersAulaTable.svelte';
   </script>
 
-  <ProfessorTable/>
+  <UsersAulaTable/>

@@ -10,10 +10,6 @@
 
 	const imagens = [
 		{
-			src: '/images/frase-motivacional.jpg',
-			alt: 'frase motivacional'
-		},
-		{
 			src: '/images/esteira.jpg',
 			alt: 'Alunos fazendo esteira'
 		},
