@@ -1,4 +1,7 @@
-DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS turma_aluno CASCADE;
+DROP TABLE IF EXISTS turma CASCADE;
+DROP TABLE IF EXISTS modalidade CASCADE;
+DROP TABLE IF EXISTS usuario CASCADE;
 
 CREATE TABLE usuario (
     id bigint GENERATED ALWAYS AS IDENTITY,
@@ -6,7 +9,7 @@ CREATE TABLE usuario (
     email text NOT NULL,
     senha text NOT NULL,
     horario text NOT NULL DEFAULT 'manhã',
-    role text NOT NULL DEFAULT 'user',
+    role text NOT NULL DEFAULT 'user', -- user, nesse caso, é o aluno, professor e admin são outros tipos de usuário
 
     
     -- Constraints
@@ -18,6 +21,36 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_senha_length CHECK (length(senha) >= 6), -- comprimento mínimo
     CONSTRAINT ck_usuario_horario_valid CHECK (horario IN ('manhã','tarde','noite')), -- tipos de usuário
     CONSTRAINT ck_usuario_role_valid CHECK (role IN ('admin', 'user', 'professor')) -- tipos de usuário
+);
+
+CREATE TABLE modalidade (
+    id_modalidade BIGINT GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,
+
+    CONSTRAINT pk_modalidade PRIMARY KEY (id_modalidade),
+    CONSTRAINT uk_modalidade_nome UNIQUE (nome) -- unicidade
+);
+
+CREATE TABLE turma (
+    id_turma BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_professor BIGINT NOT NULL,
+    id_modalidade BIGINT NOT NULL,
+    horario TEXT NOT NULL,
+
+    CONSTRAINT pk_turma PRIMARY KEY (id_turma),
+    CONSTRAINT fk_turma_professor FOREIGN KEY (id_professor) REFERENCES usuario(id),
+    CONSTRAINT fk_turma_modalidade FOREIGN KEY (id_modalidade) REFERENCES modalidade(id_modalidade),
+    CONSTRAINT ck_turma_horario_valid CHECK (horario IN ('manhã','tarde','noite')) -- tipos de horário
+);
+
+CREATE TABLE turma_aluno (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_turma BIGINT NOT NULL,
+    id_aluno BIGINT NOT NULL,
+
+    CONSTRAINT pk_turma_aluno PRIMARY KEY (id),
+    CONSTRAINT fk_turma_aluno_turma FOREIGN KEY (id_turma) REFERENCES turma(id_turma),
+    CONSTRAINT fk_turma_aluno_aluno FOREIGN KEY (id_aluno) REFERENCES usuario(id)
 );
 
 INSERT INTO usuario (login, email, senha, horario, role ) VALUES
