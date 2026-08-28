@@ -50,33 +50,20 @@ CREATE TABLE turma_aluno (
     id_aluno BIGINT NOT NULL,
 
     CONSTRAINT pk_turma_aluno PRIMARY KEY (id),
-    CONSTRAINT fk_turma_aluno_turma FOREIGN KEY (id_turma) REFERENCES turma(id_turma),
-    CONSTRAINT fk_turma_aluno_aluno FOREIGN KEY (id_aluno) REFERENCES usuario(id)
+
+    CONSTRAINT fk_turma_aluno_turma
+        FOREIGN KEY (id_turma)
+        REFERENCES turma(id_turma),
+
+    CONSTRAINT fk_turma_aluno_aluno
+        FOREIGN KEY (id_aluno)
+        REFERENCES usuario(id),
+
+    CONSTRAINT uk_turma_aluno
+        UNIQUE (id_turma, id_aluno)
 );
 
 INSERT INTO usuario (login, email, senha, horario, role ) VALUES
 -- senha efelantinho
 ('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manhã', 'admin'),
 ('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','noite', 'user');
-
-CREATE TABLE aula (
-    id_aula BIGINT GENERATED ALWAYS AS IDENTITY,
-    nome TEXT NOT NULL,
-    dia_semana TEXT NOT NULL,
-    horario TEXT NOT NULL,
-    id_usuario BIGINT NOT NULL,
-
-    CONSTRAINT pk_aula PRIMARY KEY (id_aula),
-    CONSTRAINT fk_aula_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id),
-
-    CONSTRAINT ck_aula_dia_semana_valid
-        CHECK (dia_semana IN (
-            'segunda',
-            'terça',
-            'quarta',
-            'quinta',
-            'sexta',
-            'sábado',
-            'domingo'
-        ))
-);

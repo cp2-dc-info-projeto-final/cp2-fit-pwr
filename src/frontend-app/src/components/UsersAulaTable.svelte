@@ -1,204 +1,357 @@
 <script lang="ts">
-    // Tabela de usuários
-    
-    import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Card, Badge } from 'flowbite-svelte'; // UI
-    import ConfirmModal from './ConfirmModal.svelte'; // modal de confirmação
-    import { UserEditOutline, TrashBinOutline } from 'flowbite-svelte-icons'; // ícones
-    import { goto } from '$app/navigation'; // navegação
-    import api from '$lib/api'; // API backend
-    import type { ApiResponse } from '$lib/api';
-    import { onMount } from 'svelte'; // ciclo de vida
-    import type { User } from '$lib/models/User';
-  
-    let users: User[] = []; // lista de usuários
-    let loading = true;
-    let error = '';
-    let deletingId: number | null = null; // id em deleção
-    let confirmOpen = false; // modal aberto?
-    let confirmTargetId: number | null = null; // id alvo do modal
-    let filtro = "";
-  
-    async function filtraUsuarios(){
-      try {
-        const res = await api.get(`/users?login=${encodeURIComponent(filtro)}`);
-        const body = res.data as ApiResponse<User[]>;
-        if (body.success) {
-          users = body.data ?? [];
-        } else {
-          error = body.message;
-        }
-      } catch (e: any) {
-        console.error('Erro ao carregar usuários:', e);
-        const body = e.response?.data as ApiResponse<User[]> | undefined;
-        error = body?.message || 'Erro ao carregar usuários';
-      } finally {
-        loading = false;
+  import { Card, Badge } from 'flowbite-svelte';
+  import { onMount } from 'svelte';
+  import api from '$lib/api';
+  import type { ApiResponse } from '$lib/api';
+
+  type Aula = {
+    id_turma: number;
+    horario: string;
+    nome_modalidade: string;
+    professor: string;
+    inscrito: boolean;
+  };
+
+  let aulas: Aula[] = [];
+  let loading = true;
+  let error = '';
+  let processandoId: number | null = null;
+
+  // Carrega as aulas disponíveis
+  async function carregarAulas() {
+    loading = true;
+    error = '';
+
+    try {
+      const res = await api.get('/aulas');
+      const body = res.data as ApiResponse<Aula[]>;
+
+      if (body.success) {
+        aulas = body.data ?? [];
+      } else {
+        error = body.message || 'Erro ao carregar as aulas.';
       }
+    } catch (e: any) {
+      console.error('Erro ao carregar aulas:', e);
+
+      const body = e.response?.data as ApiResponse<Aula[]> | undefined;
+
+      error = body?.message || 'Erro ao carregar as aulas.';
+    } finally {
+      loading = false;
     }
-  
-    // Abre modal de confirmação
-    function openConfirm(id: number) {
-      confirmTargetId = id;
-      confirmOpen = true;
-    }
-    // Fecha modal
-    function closeConfirm() {
-      confirmOpen = false;
-      confirmTargetId = null;
-    }
-  
-    // Confirma remoção
-    function handleConfirm() {
-      if (confirmTargetId !== null) {
-        handleDelete(confirmTargetId);
+  }
+
+  // Inscreve o usuário na aula
+  async function inscrever(idTurma: number) {
+    processandoId = idTurma;
+    error = '';
+
+    try {
+      const res = await api.post(`/aulas/${idTurma}/inscricao`);
+
+      const body = res.data as ApiResponse<null>;
+
+      if (!body.success) {
+        error = body.message || 'Erro ao realizar inscrição.';
+        return;
       }
-      closeConfirm();
+
+      // Atualiza apenas a aula modificada
+      aulas = aulas.map((aula) =>
+        aula.id_turma === idTurma
+          ? { ...aula, inscrito: true }
+          : aula
+      );
+    } catch (e: any) {
+      console.error('Erro ao realizar inscrição:', e);
+
+      const body = e.response?.data as ApiResponse<null> | undefined;
+
+      error = body?.message || 'Erro ao realizar inscrição.';
+    } finally {
+      processandoId = null;
     }
-  
-    // Cancela remoção
-    function handleCancel() {
-      closeConfirm();
-    }
-  
-    async function handleDelete(id: number) {
-      deletingId = id;
-      error = '';
-      try {
-        const res = await api.delete(`/users/${id}`);
-        const body = res.data as ApiResponse<null>;
-        if (!body.success) {
-          error = body.message;
-          return;
-        }
-        users = users.filter(user => user.id !== id);
-      } catch (e: any) {
-        console.error('Erro ao deletar usuário:', e);
-        const body = e.response?.data as ApiResponse<null> | undefined;
-        error = body?.message || 'Erro ao remover usuário.';
-      } finally {
-        deletingId = null;
+  }
+
+  // Remove a matrícula do usuário
+  async function desmatricular(idTurma: number) {
+    processandoId = idTurma;
+    error = '';
+
+    try {
+      const res = await api.delete(`/aulas/${idTurma}/inscricao`);
+
+      const body = res.data as ApiResponse<null>;
+
+      if (!body.success) {
+        error = body.message || 'Erro ao cancelar inscrição.';
+        return;
       }
+
+      // Atualiza apenas a aula modificada
+      aulas = aulas.map((aula) =>
+        aula.id_turma === idTurma
+          ? { ...aula, inscrito: false }
+          : aula
+      );
+    } catch (e: any) {
+      console.error('Erro ao cancelar inscrição:', e);
+
+      const body = e.response?.data as ApiResponse<null> | undefined;
+
+      error = body?.message || 'Erro ao cancelar inscrição.';
+    } finally {
+      processandoId = null;
     }
-  
-    onMount(async () => {
-      try {
-        const res = await api.get('/users/me');
-        const body = res.data as ApiResponse<User[]>;
-        if (body.success) {
-          users = body.data ?? [];
-        } else {
-          error = body.message;
-        }
-      } catch (e: any) {
-        console.error('Erro ao carregar usuários:', e);
-        const body = e.response?.data as ApiResponse<User[]> | undefined;
-        error = body?.message || 'Erro ao carregar usuários';
-      } finally {
-        loading = false;
-      }
-    });
-  </script>
-  
-  {#if loading}
-    <div class="my-8 text-center text-gray-500">Carregando usuários...</div>
-  {:else if error}
-    <div class="my-8 text-center text-red-500">{error}</div>
-  {:else}
-    <!-- Tabela para telas médias/grandes -->
-    <div class="hidden xl:block">
-      <!-- Tabela de usuários -->
-      <input type="search" id="busca" placeholder="digite o nome do aluno" bind:value={filtro} on:input={filtraUsuarios}>
-      <Table class="w-full max-w-5xl mx-auto my-8 shadow-lg border border-gray-200 rounded-lg">
-        <TableHead>
-          <TableHeadCell class="w-32">Nome</TableHeadCell>
-          <TableHeadCell class="min-w-0">Horário</TableHeadCell>
-          <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
-        </TableHead>
-        <TableBody>
-          {#each users as user}
-            <TableBodyRow>
-              <TableBodyCell>{user.login}</TableBodyCell>
-              <TableBodyCell class="truncate max-w-0">{user.horario}</TableBodyCell>
-              <TableBodyCell>
-              </TableBodyCell>
-              <TableBodyCell>
-                <!-- Botão editar -->
-                <button
-                  class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
-                  title="Editar"
-                  on:click={() => goto(`/users/edit/${user.id}`)}
-                >
-                  <UserEditOutline class="w-5 h-5 text-primary-500" />
-                </button>
-                <!-- Botão remover -->
-                <button
-                  title="Remover"
-                  class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                  on:click={() => openConfirm(user.id)}
-                  disabled={deletingId === user.id || loading}
-                >
-                  <TrashBinOutline class="w-5 h-5 text-red-400" />
-                </button>
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
+  }
+
+  onMount(() => {
+    carregarAulas();
+  });
+</script>
+
+{#if loading}
+
+  <div class="my-10 text-center text-gray-500">
+    <div class="text-lg font-medium">
+      Carregando aulas...
     </div>
-    <!-- Cards para telas pequenas -->
-    <div class="block xl:hidden">
-      <div class="flex flex-col items-center gap-4 my-8 max-w-3xl mx-auto md:grid md:grid-cols-2">
-        {#each users as user}
-          <!-- Card de usuário -->
-          <Card class="max-w-sm w-full p-0 overflow-hidden shadow-lg border border-gray-200">
-            <div class="px-4 pt-4 pb-2 bg-gray-100 text-left flex items-center justify-between">
-              <div>
-                <div class="text-lg font-semibold text-gray-800 text-left">{user.login}</div>
-                <div class="text-xs text-gray-400 text-left">ID: {user.id}</div>
-                <Badge color={user.role === 'admin' ? 'red' : 'blue'} class="text-xs mt-1">
-                  {user.role}
-                </Badge>
-              </div>
-              <div class="flex gap-2">
-                <!-- Botão editar -->
-                <button
-                  class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
-                  title="Editar"
-                  on:click={() => goto(`/users/edit/${user.id}`)}
-                >
-                  <UserEditOutline class="w-5 h-5 text-primary-500" />
-                </button>
-                <!-- Botão remover -->
-                <button
-                  title="Remover"
-                  class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                  on:click={() => openConfirm(user.id)}
-                  disabled={deletingId === user.id || loading}
-                >
-                  <TrashBinOutline class="w-5 h-5 text-red-400" />
-                </button>
-              </div>
-            </div>
-            <div class="px-4 pb-4 pt-2 flex flex-col gap-2 text-left">
-              <div class="flex items-center gap-2 text-left">
-                <!-- Ícone de email -->
-                <svg class="w-4 h-4 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 12A4 4 0 1 0 8 12a4 4 0 0 0 8 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7m-7-7v7m14-7v7"/></svg>
-                <span class="text-gray-700 text-sm">{user.email}</span>
-              </div>
-            </div>
-          </Card>
-        {/each}
-      </div>
+  </div>
+
+{:else if error}
+
+  <div class="my-10 text-center">
+    <div class="text-red-500">
+      {error}
     </div>
-  {/if}
-  
-  <!-- Modal de confirmação -->
-  <ConfirmModal
-    open={confirmOpen}
-    message="Tem certeza que deseja remover este usuário?"
-    confirmText="Remover"
-    cancelText="Cancelar"
-    onConfirm={handleConfirm}
-    onCancel={handleCancel}
-  />
-  
+
+    <button
+      class="mt-4 px-4 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition"
+      on:click={carregarAulas}
+    >
+      Tentar novamente
+    </button>
+  </div>
+
+{:else if aulas.length === 0}
+
+  <div class="my-10 text-center text-gray-500">
+    Nenhuma aula coletiva disponível no momento.
+  </div>
+
+{:else}
+
+  <!-- Título -->
+  <div class="max-w-6xl mx-auto px-4 mt-8 mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+      Aulas Coletivas
+    </h2>
+
+    <p class="text-gray-500 mt-1">
+      Escolha uma aula para se matricular.
+    </p>
+  </div>
+
+  <!-- Cards -->
+  <div
+    class="
+      max-w-6xl mx-auto
+      px-4 pb-10
+      grid grid-cols-1
+      sm:grid-cols-2
+      lg:grid-cols-3
+      gap-6
+    "
+  >
+
+    {#each aulas as aula}
+
+      <Card
+        class="
+          p-0 overflow-hidden
+          shadow-lg
+          border border-gray-200
+          rounded-lg
+          hover:shadow-xl
+          transition-shadow
+        "
+      >
+
+        <!-- Cabeçalho -->
+        <div class="px-5 py-4 bg-gray-100 border-b border-gray-200">
+
+          <div class="flex items-start justify-between gap-3">
+
+            <div>
+              <h3 class="text-xl font-bold text-gray-800">
+                {aula.nome_modalidade}
+              </h3>
+
+              <p class="text-sm text-gray-500 mt-1">
+                Aula coletiva
+              </p>
+            </div>
+
+            {#if aula.inscrito}
+              <Badge color="green">
+                Matriculado
+              </Badge>
+            {:else}
+              <Badge color="blue">
+                Disponível
+              </Badge>
+            {/if}
+
+          </div>
+
+        </div>
+
+        <!-- Informações -->
+        <div class="px-5 py-5 flex flex-col gap-4">
+
+          <!-- Horário -->
+          <div class="flex items-center gap-3">
+
+            <div
+              class="
+                w-10 h-10
+                rounded-full
+                bg-primary-50
+                flex items-center justify-center
+                flex-shrink-0
+              "
+            >
+              <svg
+                class="w-5 h-5 text-primary-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path
+                  stroke-linecap="round"
+                  d="M12 7v5l3 2"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-400">
+                Horário
+              </p>
+
+              <p class="font-medium text-gray-700 capitalize">
+                {aula.horario}
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Professor -->
+          <div class="flex items-center gap-3">
+
+            <div
+              class="
+                w-10 h-10
+                rounded-full
+                bg-primary-50
+                flex items-center justify-center
+                flex-shrink-0
+              "
+            >
+              <svg
+                class="w-5 h-5 text-primary-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                />
+
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4 21a8 8 0 0 1 16 0"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-400">
+                Professor
+              </p>
+
+              <p class="font-medium text-gray-700">
+                {aula.professor}
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Botão -->
+          {#if aula.inscrito}
+
+            <button
+              class="
+                w-full
+                mt-2
+                px-4 py-2.5
+                rounded-lg
+                border border-red-200
+                text-red-500
+                bg-white
+                hover:bg-red-50
+                transition
+                font-medium
+              "
+              disabled={processandoId === aula.id_turma}
+              on:click={() => desmatricular(aula.id_turma)}
+            >
+              {#if processandoId === aula.id_turma}
+                Cancelando...
+              {:else}
+                Desmatricular-se
+              {/if}
+            </button>
+
+          {:else}
+
+            <button
+              class="
+                w-full
+                mt-2
+                px-4 py-2.5
+                rounded-lg
+                bg-primary-500
+                text-white
+                hover:bg-primary-600
+                transition
+                font-medium
+              "
+              disabled={processandoId === aula.id_turma}
+              on:click={() => inscrever(aula.id_turma)}
+            >
+              {#if processandoId === aula.id_turma}
+                Inscrevendo...
+              {:else}
+                Inscrever-se
+              {/if}
+            </button>
+
+          {/if}
+
+        </div>
+
+      </Card>
+
+    {/each}
+
+  </div>
+
+{/if}
