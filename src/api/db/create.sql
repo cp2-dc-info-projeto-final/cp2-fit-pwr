@@ -3,6 +3,10 @@ DROP TABLE IF EXISTS turma CASCADE;
 DROP TABLE IF EXISTS modalidade CASCADE;
 DROP TABLE IF EXISTS usuario CASCADE;
 DROP TABLE IF EXISTS aula CASCADE;
+DROP TABLE IF EXISTS exercicio CASCADE;
+DROP TABLE IF EXISTS plano_treino CASCADE;
+DROP TABLE IF EXISTS treino CASCADE;
+DROP TABLE IF EXISTS treino_exercicio CASCADE;
 
 CREATE TABLE usuario (
     id bigint GENERATED ALWAYS AS IDENTITY,
@@ -63,7 +67,106 @@ CREATE TABLE turma_aluno (
         UNIQUE (id_turma, id_aluno)
 );
 
+CREATE TABLE exercicio (
+    id_exercicio BIGINT GENERATED ALWAYS AS IDENTITY,
+    nome TEXT NOT NULL,
+    grupo_muscular TEXT NOT NULL,
+    descricao TEXT,
+    imagem TEXT,
+
+    CONSTRAINT pk_exercicio PRIMARY KEY (id_exercicio),
+    CONSTRAINT uk_exercicio_nome UNIQUE (nome)
+);
+
+CREATE TABLE plano_treino (
+    id_plano BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_usuario BIGINT NOT NULL,
+    nome TEXT NOT NULL,
+    id_professor BIGINT NOT NULL,
+    descricao TEXT,
+
+    CONSTRAINT pk_plano_treino PRIMARY KEY (id_plano),
+
+    CONSTRAINT fk_plano_treino_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+        FOREIGN KEY (id_professor)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE treino (
+    id_treino BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_plano BIGINT NOT NULL,
+    nome TEXT NOT NULL,
+    dia_semana TEXT NOT NULL,
+
+    CONSTRAINT pk_treino PRIMARY KEY (id_treino),
+
+    CONSTRAINT fk_treino_plano
+        FOREIGN KEY (id_plano)
+        REFERENCES plano_treino(id_plano)
+        ON DELETE CASCADE,
+
+    CONSTRAINT ck_treino_dia_valid
+        CHECK (
+            dia_semana IN (
+                'segunda',
+                'terça',
+                'quarta',
+                'quinta',
+                'sexta',
+                'sábado',
+                'domingo'
+            )
+        )
+);
+
+CREATE TABLE treino_exercicio (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_treino BIGINT NOT NULL,
+    id_exercicio BIGINT NOT NULL,
+
+    series INTEGER NOT NULL,
+    repeticoes INTEGER NOT NULL,
+    carga NUMERIC(6,2),
+    descanso INTEGER NOT NULL DEFAULT 60,
+    ordem INTEGER NOT NULL,
+    observacao TEXT,
+
+    CONSTRAINT pk_treino_exercicio PRIMARY KEY (id),
+
+    CONSTRAINT fk_treino_exercicio_treino
+        FOREIGN KEY (id_treino)
+        REFERENCES treino(id_treino)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_treino_exercicio_exercicio
+        FOREIGN KEY (id_exercicio)
+        REFERENCES exercicio(id_exercicio)
+        ON DELETE CASCADE,
+
+    CONSTRAINT ck_treino_exercicio_series
+        CHECK (series > 0),
+
+    CONSTRAINT ck_treino_exercicio_repeticoes
+        CHECK (repeticoes > 0),
+
+    CONSTRAINT ck_treino_exercicio_carga
+        CHECK (carga IS NULL OR carga >= 0),
+
+    CONSTRAINT ck_treino_exercicio_descanso
+        CHECK (descanso >= 0),
+
+    CONSTRAINT ck_treino_exercicio_ordem
+        CHECK (ordem > 0),
+
+    CONSTRAINT uk_treino_exercicio_ordem
+        UNIQUE (id_treino, ordem)
+);
+
 INSERT INTO usuario (login, email, senha, horario, role ) VALUES
 -- senha efelantinho
 ('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manhã', 'admin'),
 ('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','noite', 'user');
+

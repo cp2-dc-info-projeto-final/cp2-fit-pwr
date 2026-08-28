@@ -82,16 +82,19 @@
     <NavHamburger />
     <NavUl>
       <NavLi href="/" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Home</NavLi>
-      <NavLi href="/about" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">planos</NavLi>
+      <NavLi href="/about" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Planos</NavLi>
      
       {#if hasToken}
         {#if user} <!-- se existir usuário é porque conseguiu logar-->
         <NavLi href="/edição" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Perfil</NavLi>
         <NavLi href="/aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Aulas Coletivas</NavLi>
+        <NavLi href="/treino" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Meu Treino</NavLi>
+
           {#if user.role === 'admin'} <!-- só exibe menu usuários para admin-->
             <NavLi href="/users" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Usuários</NavLi>
             <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Turmas</NavLi>
             <NavLi href="/modalidades" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Modalidades</NavLi>
+            <NavLi href="/professor" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Criar treino</NavLi>
           {/if}
         {#if user.role === 'professor'}
         <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Professores</NavLi>
@@ -100,7 +103,7 @@
             <div class="flex items-center">
               <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, {user.login}</span>
               {#if user.role === 'professor'}
-              <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, professor{user.login}</span>
+              <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, {user.login}</span>
               {/if}
               <button 
                 class="ml-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded text-sm flex items-center gap-1"
