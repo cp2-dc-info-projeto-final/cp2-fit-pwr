@@ -33,17 +33,23 @@ const api = axios.create({
 
 // Interceptor para adicionar automaticamente o token Bearer
 api.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config) => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('auth_token');
+
+      console.log('TOKEN ENCONTRADO:', token);
+
       if (token) {
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
+
+        console.log('AUTHORIZATION ENVIADO:', config.headers.Authorization);
       }
     }
+
     return config;
   },
-  (error: AxiosError) => {
+  (error) => {
     return Promise.reject(error);
   }
 );

@@ -5,12 +5,11 @@ const verifyToken = (req, res, next) => {
   /* 
     Header do tipo
     Authorization: Bearer <token>
-    Split ' ' separa o 'Bearer' do token
+    ...
   */
   const token = req.headers.authorization?.split(' ')[1];
   
   if (!token) {
-    // http status 401 = Unauthorized
     return res.status(401).json({
       success: false,
       message: 'Token não fornecido',
@@ -21,14 +20,8 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    /*
-    em um middleware, o next é análogo ao return
-    porém ao invés de concluir a requisição
-    ele passa para o próximo middleware
-    */
     next();
   } catch (error) {
-    // http status 401 = Unauthorized
     return res.status(401).json({
       success: false,
       message: 'Token inválido',

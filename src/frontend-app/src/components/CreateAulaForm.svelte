@@ -66,55 +66,54 @@
   }
 }
   async function criarAula() {
-    mensagem = '';
-    erro = '';
+  mensagem = '';
+  erro = '';
 
-    if (!idModalidade || !idProfessor || !horario) {
-      erro = 'Preencha todos os campos.';
+  if (!idModalidade || !idProfessor || !horario) {
+    erro = 'Preencha todos os campos.';
+    return;
+  }
+
+  criando = true;
+
+  try {
+    const res = await api.post('/turmas', {
+      id_modalidade: Number(idModalidade),
+      id_professor: Number(idProfessor),
+      horario
+    });
+
+    const body = res.data as ApiResponse<any>;
+
+    if (!body.success) {
+      erro = body.message || 'Erro ao criar aula.';
       return;
     }
 
-    criando = true;
+    mensagem = body.message || 'Aula criada com sucesso!';
 
-    try {
-      const res = await api.post('/turmas', {
-        id_modalidade: Number(idModalidade),
-        id_professor: Number(idProfessor),
-        horario
-      });
+    idModalidade = '';
+    idProfessor = '';
+    horario = '';
 
-    } catch (error) {
-  console.error('Erro ao criar turma:', error);
-}      
+  } catch (e: any) {
+  console.error('ERRO:', e);
+  console.error('STATUS:', e.response?.status);
+  console.error('DATA:', e.response?.data);
+  console.error('HEADERS:', e.response?.headers);
 
-      const body = res.data as ApiResponse<any>;
+    const body = e.response?.data as
+      | ApiResponse<any>
+      | undefined;
 
-      if (!body.success) {
-        erro = body.message || 'Erro ao criar aula.';
-        return;
-      }
+    erro =
+    e.response?.data?.message ||
+    'Erro ao criar aula.';
 
-      mensagem =
-        body.message || 'Aula criada com sucesso!';
-
-      idModalidade = '';
-      idProfessor = '';
-      horario = '';
-
-    } catch (e: any) {
-      console.error('Erro ao criar aula:', e);
-
-      const body = e.response?.data as
-        | ApiResponse<any>
-        | undefined;
-
-      erro =
-        body?.message ||
-        'Erro ao criar aula.';
-    } finally {
-      criando = false;
-    }
+  } finally {
+    criando = false;
   }
+}
 
   onMount(() => {
     carregarDados();
