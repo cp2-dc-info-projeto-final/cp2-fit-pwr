@@ -36,6 +36,27 @@ const verifyToken = (req, res, next) => {
     });
   }
 };
+// Middleware para verificar se o usuário é admin ou professor
+
+function isAdminOrProfessor(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Usuário não autenticado',
+      errors: []
+    });
+  }
+
+  if (req.user.role !== 'admin' && req.user.role !== 'professor') {
+    return res.status(403).json({
+      success: false,
+      message: 'Acesso permitido apenas para administradores e professores',
+      errors: []
+    });
+  }
+
+  next();
+}
 
 // Middleware para verificar se o usuário é admin
 const isAdmin = (req, res, next) => {
@@ -51,4 +72,4 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, isAdmin};
+module.exports = { verifyToken, isAdmin, isAdminOrProfessor};

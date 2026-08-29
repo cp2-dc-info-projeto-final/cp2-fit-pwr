@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const pool = require('../db/config');
-const { verifyToken, isAdmin } = require('../middlewares/auth');
+const { verifyToken, isAdminOrProfessor } = require('../middlewares/auth');
 
 // Funções utilitárias de resposta mantidas do seu padrão original
 function sendSuccess(res, status, message, data) {
@@ -64,39 +64,145 @@ router.get('/:id', verifyToken, async function(req, res) {
 });
 
 /* POST - Criar nova turma (Apenas Admin) */
-router.post('/', verifyToken, isAdmin, async function(req, res) {
+router.post('/', verifyToken, isAdminOrProfessor, async function(req, res) {
+  console.log('POST /turmas');
+  console.log('Usuário:', req.user);
+  console.log('Body recebido:', req.body);
   try {
+
+    if (
+      req.user.role !== 'admin' &&
+      req.user.role !== 'professor'
+    ) {
+      return sendError(
+        res,
+        403,
+        'Apenas professores ou administradores podem criar aulas.'
+      );
+    }
+
     const { id_professor, id_modalidade, horario } = req.body;
-    
-    // Validação básica
+
     if (!id_professor || !id_modalidade || !horario || horario.trim() === '') {
       const errors = [];
-      if (!id_professor) errors.push({ field: 'id_professor', message: 'Professor é obrigatório', code: 'REQUIRED' });
-      if (!id_modalidade) errors.push({ field: 'id_modalidade', message: 'Modalidade é obrigatório', code: 'REQUIRED' });
-      if (!horario || horario.trim() === '') errors.push({ field: 'horario', message: 'Horário é obrigatório', code: 'REQUIRED' });
 
-      return sendError(res, 400, 'Campos obrigatórios em falta', errors);
+      if (!id_professor) {
+        errors.push({
+          field: 'id_professor',
+          message: 'Professor é obrigatório',
+          code: 'REQUIRED'
+        });
+      }
+
+      if (!id_modalidade) {
+        errors.push({
+          field: 'id_modalidade',
+          message: 'Modalidade é obrigatória',
+          code: 'REQUIRED'
+        });
+      }
+
+      if (!horario || horario.trim() === '') {
+        errors.push({
+          field: 'horario',
+          message: 'Horário é obrigatório',
+          code: 'REQUIRED'
+        });
+      }
+
+      return sendError(
+        res,
+        400,
+        'Campos obrigatórios em falta',
+        errors
+      );
+    }
+
+    const professor = await pool.query(
+      `
+      SELECT id
+      FROM usuario
+      WHERE id = $1
+      AND role = 'professor'
+      `,
+      [id_professor]
+    );
+
+    if (professor.rows.length === 0) {
+      return sendError(
+        res,
+        404,
+        'Professor não encontrado.'
+      );
+    }
+
+    const modalidade = await pool.query(
+      `
+      SELECT id_modalidade
+      FROM modalidade
+      WHERE id_modalidade = $1
+      `,
+      [id_modalidade]
+    );
+
+    if (modalidade.rows.length === 0) {
+      return sendError(
+        res,
+        404,
+        'Modalidade não encontrada.'
+      );
     }
 
     const result = await pool.query(
-      'INSERT INTO turma (id_professor, id_modalidade, horario) VALUES ($1, $2, $3) RETURNING id_turma, id_professor, id_modalidade, horario',
-      [id_professor, id_modalidade, horario]
+      `
+      INSERT INTO turma
+      (
+        id_professor,
+        id_modalidade,
+        horario
+      )
+      VALUES ($1, $2, $3)
+
+      RETURNING
+        id_turma,
+        id_professor,
+        id_modalidade,
+        horario
+      `,
+      [
+        id_professor,
+        id_modalidade,
+        horario
+      ]
     );
 
-    return sendSuccess(res, 201, 'Turma criada com sucesso', result.rows);
+    return sendSuccess(
+      res,
+      201,
+      'Aula criada com sucesso',
+      result.rows[0]
+    );
+
   } catch (error) {
-    console.error('Erro ao criar turma:', error);
-    if (error.code === '23503') {
-      return sendError(res, 400, 'O professor ou a modalidade informada não existe.', [
-        { field: 'id_professor', message: 'Verifique os IDs de relacionamento', code: 'FOREIGN_KEY_VIOLATION' }
-      ]);
-    }
-    return sendError(res, 500, 'Erro interno do servidor');
-  }
+
+ console.error('=================================');
+  console.error('ERRO AO CRIAR AULA');
+  console.error('Mensagem:', error.message);
+  console.error('Código:', error.code);
+  console.error('Detalhes:', error.detail);
+  console.error('Stack:', error.stack);
+  console.error('=================================');
+
+  return sendError(
+    res,
+    500,
+    'Erro interno do servidor'
+  );
+}
 });
 
-/* PUT - Atualizar turma por ID (Apenas Admin) */
-router.put('/:id', verifyToken, isAdmin, async function(req, res) {
+/* PUT - Atualizar turma por ID (Admin ou Professor) */
+router.put('/:id', verifyToken, isAdminOrProfessor, async function(req, res) {
   try {
     const { id } = req.params;
     const { id_professor, id_modalidade, horario } = req.body;
@@ -127,8 +233,8 @@ router.put('/:id', verifyToken, isAdmin, async function(req, res) {
   }
 });
 
-/* DELETE - Remover turma por ID (Apenas Admin) */
-router.delete('/:id', verifyToken, isAdmin, async function(req, res) {
+/* DELETE - Remover turma por ID (Admin ou Professor) */
+router.delete('/:id', verifyToken, isAdminOrProfessor, async function(req, res) {
   try {
     const { id } = req.params;
 

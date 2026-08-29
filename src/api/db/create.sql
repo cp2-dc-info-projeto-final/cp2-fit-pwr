@@ -45,7 +45,7 @@ CREATE TABLE turma (
     CONSTRAINT pk_turma PRIMARY KEY (id_turma),
     CONSTRAINT fk_turma_professor FOREIGN KEY (id_professor) REFERENCES usuario(id),
     CONSTRAINT fk_turma_modalidade FOREIGN KEY (id_modalidade) REFERENCES modalidade(id_modalidade),
-    CONSTRAINT ck_turma_horario_valid CHECK (horario IN ('manhã','tarde','noite')) -- tipos de horário
+    CONSTRAINT ck_turma_horario_valid CHECK (horario ~ '^(?:[01][0-9]|2[0-3]):[0-5][0-9]$'); -- tipos de horário(
 );
 
 CREATE TABLE turma_aluno (
