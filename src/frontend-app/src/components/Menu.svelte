@@ -75,7 +75,7 @@
 <div class="relative px-8">
   <Navbar class="fixed start-0 top-0 z-20 w-full bg-gray-800 px-2 py-2.5 sm:px-4">
     <NavBrand href="/">
-      <img src="/images/icon.svg" class="me-3 h-6 sm:h-9" alt="Logo aleatória" />
+      <img src="/images/IconePedroII.png" class="me-3 h-6 sm:h-9" alt="Logo aleatória" />
       <!-- ALTERADO: apenas o texto abaixo -->
       <Heading class="self-center text-xl font-semibold whitespace-nowrap text-primary-500 dark:text-primary-400">cp2fit</Heading>
     </NavBrand>
@@ -86,25 +86,31 @@
      
       {#if hasToken}
         {#if user} <!-- se existir usuário é porque conseguiu logar-->
-        <NavLi href="/edição" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Perfil</NavLi>
-        <NavLi href="/aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Aulas Coletivas</NavLi>
-        <NavLi href="/treino" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Meu Treino</NavLi>
-
-          {#if user.role === 'admin'} <!-- só exibe menu usuários para admin-->
-            <NavLi href="/users" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Usuários</NavLi>
-            <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Turmas</NavLi>
-            <NavLi href="/gerenciar_aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Criar Aulas</NavLi>
-            <NavLi href="/modalidades" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Modalidades</NavLi>
-            <NavLi href="/professor" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Criar treino</NavLi>
-          {/if}
+          {#if user.role === 'user' || user.role === 'professor'}
+          <NavLi href="/edição" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Perfil</NavLi>
+        {/if}
+        {#if user.role === 'user'}
+          <NavLi href="/aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Aulas Coletivas</NavLi>
+          <NavLi href="/treino" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Meu Treino</NavLi>
+        {/if}
+        {#if user.role === 'admin'}
+          <NavLi href="/users" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Usuários</NavLi>
+          <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Turmas</NavLi>
+          <NavLi href="/modalidades" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Modalidades</NavLi>
+        {/if}
         {#if user.role === 'professor'}
-        <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Professores</NavLi>
+          <NavLi href="/gerenciar_aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Criar Aulas</NavLi>
         {/if}
           <NavLi>
             <div class="flex items-center">
-              <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, {user.login}</span>
+              {#if user.role === 'user'}
+                <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, {user.login}</span>
+              {/if}
+              {#if user.role === 'admin'}
+                <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, ADM</span>
+              {/if}
               {#if user.role === 'professor'}
-              <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, {user.login}</span>
+                <span class="text-primary-500 dark:text-primary-400 px-4 py-2">Olá, Professor</span>
               {/if}
               <button 
                 class="ml-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded text-sm flex items-center gap-1"

@@ -151,7 +151,7 @@
 
     <Table class="w-full max-w-5xl mx-auto my-4 shadow-lg border border-gray-200 rounded-lg">
       <TableHead>
-        <TableHeadCell class="w-16">ID</TableHeadCell>
+        <TableHeadCell class="w-16">Aula</TableHeadCell>
         <TableHeadCell class="w-48">Professor</TableHeadCell>
         <TableHeadCell class="min-w-0">Modalidade</TableHeadCell>
         <TableHeadCell class="min-w-0">Horário</TableHeadCell>
