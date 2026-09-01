@@ -14,12 +14,7 @@
   let usersOptions: { value: string; name: string }[] = []; // lista de professores (users) para o select
   let modalities: { value: string; name: string }[] = []; // lista de modalidades para o select
 
-  let scheduleOptions = [
-    { value: 'manhã', name: 'Manhã' },
-    { value: 'tarde', name: 'Tarde' },
-    { value: 'noite', name: 'Noite' }
-  ];
-
+  
   let loading = false;
   let error = '';
   let fieldErrors: ApiFieldError[] = [];
@@ -151,9 +146,19 @@
     <!-- Campo horário -->
     <div>
       <Label for="horario">Horário da Turma</Label>
-      <Select id="horario" items={scheduleOptions} bind:value={classData.horario} placeholder="Selecione o turno..." required class="mt-1" />
+
+      <input
+        id="horario"
+        type="time"
+        bind:value={classData.horario}
+        required
+        class="w-full rounded-lg border border-gray-300 p-2.5 mt-1"
+      />
+
       {#if errorOf('horario')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('horario')}</div>
+        <div class="mt-1 text-sm text-red-500">
+          {errorOf('horario')}
+        </div>
       {/if}
     </div>
     
