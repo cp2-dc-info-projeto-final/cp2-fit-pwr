@@ -24,21 +24,178 @@ router.get('/', verifyToken, async function(req, res) {
   try {
     const { horario } = req.query;
 
-    let query = 'SELECT id_turma, id_professor, id_modalidade, horario FROM turma';
-    let params = [];
+    let query = `
+      SELECT
+        t.id_turma,
+        t.id_professor,
+        t.id_modalidade,
+        t.horario,
+        m.nome AS nome_modalidade,
+        u.login AS professor,
+        COUNT(ta.id_aluno)::integer AS quantidade_alunos
+      FROM turma t
+      INNER JOIN modalidade m
+        ON m.id_modalidade = t.id_modalidade
+      INNER JOIN usuario u
+        ON u.id = t.id_professor
+      LEFT JOIN turma_aluno ta
+        ON ta.id_turma = t.id_turma
+    `;
 
-    if (horario && horario.trim() !== '') {
-      query += ' WHERE horario ILIKE $1';
-      params.push(`%${horario}%`);
+    const params = [];
+    const conditions = [];
+
+    if (req.user.role === 'professor') {
+      params.push(req.user.id);
+      conditions.push(`t.id_professor = $${params.length}`);
     }
 
-    query += ' ORDER BY id_turma';
+    if (horario && horario.trim() !== '') {
+      params.push(`%${horario}%`);
+      conditions.push(`t.horario ILIKE $${params.length}`);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    query += `
+      GROUP BY
+        t.id_turma,
+        t.id_professor,
+        t.id_modalidade,
+        t.horario,
+        m.nome,
+        u.login
+      ORDER BY t.id_turma
+    `;
 
     const result = await pool.query(query, params);
+
     return sendSuccess(res, 200, null, result.rows);
+
   } catch (error) {
     console.error('Erro ao buscar turmas:', error);
     return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
+
+router.get('/:id/alunos', verifyToken, isAdminOrProfessor, async function (req, res) {
+  const { id } = req.params;
+
+  try {
+    const turmaResult = await pool.query(
+      `SELECT id_turma, id_professor
+       FROM turma
+       WHERE id_turma = $1`,
+      [id]
+    );
+
+    if (turmaResult.rows.length === 0) {
+      return sendError(res, 404, 'Turma não encontrada.');
+    }
+
+    const turma = turmaResult.rows[0];
+
+    if (
+      req.user.role === 'professor' &&
+      Number(turma.id_professor) !== Number(req.user.id)
+    ) {
+      return sendError(
+        res,
+        403,
+        'Você não tem permissão para visualizar os alunos desta turma.'
+      );
+    }
+
+    const result = await pool.query(
+      `SELECT
+        u.id,
+        u.login,
+        u.email
+       FROM turma_aluno ta
+       INNER JOIN usuario u ON u.id = ta.id_aluno
+       WHERE ta.id_turma = $1
+       ORDER BY u.login`,
+      [id]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      'Alunos encontrados com sucesso.',
+      result.rows
+    );
+
+  } catch (error) {
+    console.error('Erro ao buscar alunos da turma:', error);
+
+    return sendError(
+      res,
+      500,
+      'Erro interno ao buscar alunos.'
+    );
+  }
+});
+
+router.delete('/:id/alunos/:idAluno', verifyToken, isAdminOrProfessor, async function (req, res) {
+  const { id, idAluno } = req.params;
+
+  try {
+    const turmaResult = await pool.query(
+      `SELECT id_turma, id_professor
+       FROM turma
+       WHERE id_turma = $1`,
+      [id]
+    );
+
+    if (turmaResult.rows.length === 0) {
+      return sendError(res, 404, 'Turma não encontrada.');
+    }
+
+    const turma = turmaResult.rows[0];
+
+    if (
+      req.user.role === 'professor' &&
+      Number(turma.id_professor) !== Number(req.user.id)
+    ) {
+      return sendError(
+        res,
+        403,
+        'Você não tem permissão para cancelar esta matrícula.'
+      );
+    }
+
+    const result = await pool.query(
+      `DELETE FROM turma_aluno
+       WHERE id_turma = $1
+       AND id_aluno = $2
+       RETURNING id`,
+      [id, idAluno]
+    );
+
+    if (result.rows.length === 0) {
+      return sendError(
+        res,
+        404,
+        'Matrícula não encontrada.'
+      );
+    }
+
+    return sendSuccess(
+      res,
+      200,
+      'Matrícula cancelada com sucesso.'
+    );
+
+  } catch (error) {
+    console.error('Erro ao cancelar matrícula:', error);
+
+    return sendError(
+      res,
+      500,
+      'Erro interno ao cancelar matrícula.'
+    );
   }
 });
 
@@ -81,7 +238,11 @@ router.post('/', verifyToken, isAdminOrProfessor, async function(req, res) {
       );
     }
 
-    const { id_professor, id_modalidade, horario } = req.body;
+    let { id_professor, id_modalidade, horario } = req.body;
+
+    if (req.user.role === 'professor') {
+  id_professor = req.user.id;
+}
 
     if (!id_professor || !id_modalidade || !horario || horario.trim() === '') {
       const errors = [];
@@ -202,52 +363,171 @@ router.post('/', verifyToken, isAdminOrProfessor, async function(req, res) {
 });
 
 /* PUT - Atualizar turma por ID (Admin ou Professor) */
-router.put('/:id', verifyToken, isAdminOrProfessor, async function(req, res) {
-  try {
-    const { id } = req.params;
-    const { id_professor, id_modalidade, horario } = req.body;
+router.put('/:id', verifyToken, isAdminOrProfessor, async function (req, res) {
+  const { id } = req.params;
+  let { id_professor, id_modalidade, horario } = req.body;
 
-    // Verificar se existe
-    const exists = await pool.query('SELECT id_turma FROM turma WHERE id_turma = $1', [id]);
-    if (exists.rows.length === 0) {
-      return sendError(res, 404, 'Turma não encontrada');
+  try {
+    const turmaResult = await pool.query(
+      `SELECT id_turma, id_professor
+       FROM turma
+       WHERE id_turma = $1`,
+      [id]
+    );
+
+    if (turmaResult.rows.length === 0) {
+      return sendError(res, 404, 'Turma não encontrada.');
+    }
+
+    const turma = turmaResult.rows[0];
+
+    if (
+      req.user.role === 'professor' &&
+      Number(turma.id_professor) !== Number(req.user.id)
+    ) {
+      return sendError(
+        res,
+        403,
+        'Você não tem permissão para editar esta aula.'
+      );
+    }
+
+    if (req.user.role === 'professor') {
+      id_professor = req.user.id;
+    }
+
+    if (id_professor !== undefined) {
+      const professorResult = await pool.query(
+        `SELECT id
+         FROM usuario
+         WHERE id = $1
+           AND role = 'professor'`,
+        [id_professor]
+      );
+
+      if (professorResult.rows.length === 0) {
+        return sendError(res, 400, 'Professor inválido.');
+      }
+    }
+
+    if (id_modalidade !== undefined) {
+      const modalidadeResult = await pool.query(
+        `SELECT id_modalidade
+         FROM modalidade
+         WHERE id_modalidade = $1`,
+        [id_modalidade]
+      );
+
+      if (modalidadeResult.rows.length === 0) {
+        return sendError(res, 400, 'Modalidade inválida.');
+      }
+    }
+
+    if (horario !== undefined) {
+      const horarioValido =
+        typeof horario === 'string' &&
+        /^\d{2}:\d{2}$/.test(horario);
+
+      if (!horarioValido) {
+        return sendError(
+          res,
+          400,
+          'O horário deve estar no formato HH:MM.'
+        );
+      }
     }
 
     const result = await pool.query(
-      `UPDATE turma 
-       SET id_professor = COALESCE($1, id_professor), 
-           id_modalidade = COALESCE($2, id_modalidade), 
-           horario = COALESCE($3, horario) 
-       WHERE id_turma = $4 
+      `UPDATE turma
+       SET
+         id_professor = COALESCE($1, id_professor),
+         id_modalidade = COALESCE($2, id_modalidade),
+         horario = COALESCE($3, horario)
+       WHERE id_turma = $4
        RETURNING id_turma, id_professor, id_modalidade, horario`,
-      [id_professor, id_modalidade, horario, id]
+      [
+        id_professor ?? null,
+        id_modalidade ?? null,
+        horario ?? null,
+        id
+      ]
     );
 
-    return sendSuccess(res, 200, 'Turma atualizada com sucesso', result.rows);
+    return sendSuccess(
+      res,
+      200,
+      'Aula atualizada com sucesso.',
+      result.rows[0]
+    );
+
   } catch (error) {
     console.error('Erro ao atualizar turma:', error);
+
     if (error.code === '23503') {
-      return sendError(res, 400, 'O professor ou a modalidade informada não existe.');
+      return sendError(
+        res,
+        400,
+        'Professor ou modalidade não encontrada.'
+      );
     }
-    return sendError(res, 500, 'Erro interno do servidor');
+
+    return sendError(
+      res,
+      500,
+      'Erro interno ao atualizar a aula.'
+    );
   }
 });
 
 /* DELETE - Remover turma por ID (Admin ou Professor) */
-router.delete('/:id', verifyToken, isAdminOrProfessor, async function(req, res) {
+router.delete('/:id', verifyToken, isAdminOrProfessor, async function (req, res) {
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
+    const turmaResult = await pool.query(
+      `SELECT id_turma, id_professor
+       FROM turma
+       WHERE id_turma = $1`,
+      [id]
+    );
 
-    const result = await pool.query('DELETE FROM turma WHERE id_turma = $1 RETURNING id_turma', [id]);
-
-    if (result.rows.length === 0) {
-      return sendError(res, 404, 'Turma não encontrada');
+    if (turmaResult.rows.length === 0) {
+      return sendError(res, 404, 'Aula não encontrada.');
     }
 
-    return sendSuccess(res, 200, 'Turma removida com sucesso');
+    const turma = turmaResult.rows[0];
+
+    if (
+      req.user.role === 'professor' &&
+      Number(turma.id_professor) !== Number(req.user.id)
+    ) {
+      return sendError(
+        res,
+        403,
+        'Você não tem permissão para excluir esta aula.'
+      );
+    }
+
+    await pool.query(
+      `DELETE FROM turma
+       WHERE id_turma = $1`,
+      [id]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      'Aula excluída com sucesso.'
+    );
+
   } catch (error) {
-    console.error('Erro ao remover turma:', error);
-    return sendError(res, 500, 'Erro interno do servidor');
+    console.error('Erro ao excluir aula:', error);
+
+    return sendError(
+      res,
+      500,
+      'Erro interno ao excluir a aula.'
+    );
   }
 });
 

@@ -216,5 +216,247 @@ router.delete('/:id/inscricao', verifyToken, async function(req, res) {
   }
 });
 
+/*
+ * GET - Buscar aulas do professor logado
+ *
+ * Retorna somente as aulas em que
+ * o professor logado é responsável.
+ */
+router.get('/professor', verifyToken, async function(req, res) {
+  try {
+    if (
+      req.user.role !== 'professor' &&
+      req.user.role !== 'admin'
+    ) {
+      return sendError(
+        res,
+        403,
+        'Apenas professores ou administradores podem acessar este recurso.'
+      );
+    }
+
+    const idProfessor = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT
+        t.id_turma,
+        t.horario,
+        m.nome AS nome_modalidade,
+        u.login AS professor,
+        COUNT(ta.id)::INTEGER AS quantidade_alunos
+
+      FROM turma t
+
+      INNER JOIN modalidade m
+        ON t.id_modalidade = m.id_modalidade
+
+      INNER JOIN usuario u
+        ON t.id_professor = u.id
+
+      LEFT JOIN turma_aluno ta
+        ON ta.id_turma = t.id_turma
+
+      WHERE t.id_professor = $1
+
+      GROUP BY
+        t.id_turma,
+        t.horario,
+        m.nome,
+        u.login
+
+      ORDER BY t.horario
+      `,
+      [idProfessor]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      null,
+      result.rows
+    );
+
+  } catch (error) {
+    console.error(
+      'Erro ao buscar aulas do professor:',
+      error
+    );
+
+    return sendError(
+      res,
+      500,
+      'Erro interno do servidor'
+    );
+  }
+});
+
+/*
+ * GET - Buscar alunos matriculados em uma aula
+ *
+ * O professor só pode visualizar alunos
+ * das próprias aulas.
+ */
+router.get('/:id/alunos', verifyToken, async function(req, res) {
+  try {
+    if (
+      req.user.role !== 'professor' &&
+      req.user.role !== 'admin'
+    ) {
+      return sendError(
+        res,
+        403,
+        'Apenas professores ou administradores podem acessar este recurso.'
+      );
+    }
+
+    const idTurma = req.params.id;
+    const idProfessor = req.user.id;
+
+    const turma = await pool.query(
+      `
+      SELECT id_turma
+      FROM turma
+      WHERE id_turma = $1
+      AND id_professor = $2
+      `,
+      [idTurma, idProfessor]
+    );
+
+    if (turma.rows.length === 0) {
+      return sendError(
+        res,
+        404,
+        'Aula não encontrada ou você não é o professor desta aula.'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.login,
+        u.email
+
+      FROM turma_aluno ta
+
+      INNER JOIN usuario u
+        ON ta.id_aluno = u.id
+
+      WHERE ta.id_turma = $1
+
+      ORDER BY u.login
+      `,
+      [idTurma]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      null,
+      result.rows
+    );
+
+  } catch (error) {
+    console.error(
+      'Erro ao buscar alunos da aula:',
+      error
+    );
+
+    return sendError(
+      res,
+      500,
+      'Erro interno do servidor'
+    );
+  }
+});
+
+/*
+ * DELETE - Cancelar matrícula de um aluno em uma aula
+ *
+ * Somente o professor responsável pela aula
+ * ou um administrador pode realizar a operação.
+ */
+router.delete(
+  '/:id/alunos/:idAluno',
+  verifyToken,
+  async function(req, res) {
+
+    try {
+
+      if (
+        req.user.role !== 'professor' &&
+        req.user.role !== 'admin'
+      ) {
+        return sendError(
+          res,
+          403,
+          'Apenas professores ou administradores podem cancelar matrículas.'
+        );
+      }
+
+      const idTurma = req.params.id;
+      const idAluno = req.params.idAluno;
+      const idProfessor = req.user.id;
+
+      const turma = await pool.query(
+        `
+        SELECT id_turma
+        FROM turma
+        WHERE id_turma = $1
+        AND id_professor = $2
+        `,
+        [idTurma, idProfessor]
+      );
+
+      if (turma.rows.length === 0) {
+        return sendError(
+          res,
+          404,
+          'Aula não encontrada ou você não é o professor desta aula.'
+        );
+      }
+
+      const result = await pool.query(
+        `
+        DELETE FROM turma_aluno
+        WHERE id_turma = $1
+        AND id_aluno = $2
+        RETURNING id
+        `,
+        [idTurma, idAluno]
+      );
+
+      if (result.rows.length === 0) {
+        return sendError(
+          res,
+          404,
+          'Aluno não está matriculado nesta aula.'
+        );
+      }
+
+      return sendSuccess(
+        res,
+        200,
+        'Matrícula cancelada com sucesso.'
+      );
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao cancelar matrícula:',
+        error
+      );
+
+      return sendError(
+        res,
+        500,
+        'Erro interno do servidor'
+      );
+    }
+  }
+);
+
+
 
 module.exports = router;

@@ -99,7 +99,7 @@
           <NavLi href="/modalidades" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Modalidades</NavLi>
         {/if}
         {#if user.role === 'professor'}
-          <NavLi href="/gerenciar_aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Criar Aulas</NavLi>
+          <NavLi href="/gerenciar_aulas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Gerenciar Aulas</NavLi>
         {/if}
           <NavLi>
             <div class="flex items-center">

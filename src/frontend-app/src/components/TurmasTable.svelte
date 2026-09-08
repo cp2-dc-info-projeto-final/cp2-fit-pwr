@@ -1,256 +1,838 @@
 <script lang="ts">
-  // Tabela de turmas
-  
-  import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Card } from 'flowbite-svelte'; // UI
-  import ConfirmModal from './ConfirmModal.svelte'; // modal de confirmação
-  import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons'; // ícones
-  import { goto } from '$app/navigation'; // navegação
-  import api from '$lib/api'; // API backend
+  import { onMount } from 'svelte';
+  import { Card } from 'flowbite-svelte';
+  import api from '$lib/api';
   import type { ApiResponse } from '$lib/api';
-  import { onMount } from 'svelte'; // ciclo de vida
 
-  // Interfaces locais para mapeamento das chaves estrangeiras
-  interface ClassItem {
-    id_turma: number;
-    id_professor: number;
+  interface Modalidade {
     id_modalidade: number;
+    nome: string;
+  }
+
+  interface Professor {
+    id: number;
+    login: string;
+  }
+
+  interface UsuarioLogado {
+    id: number;
+    login: string;
+    role: string;
+  }
+
+  interface Turma {
+    id_turma: number;
     horario: string;
+    nome_modalidade: string;
+    professor: string;
+    quantidade_alunos: number;
   }
 
-  let classes: ClassItem[] = []; // lista de turmas
-  let loading = true;
-  let error = '';
-  let deletingId: number | null = null; // id em deleção
-  let confirmOpen = false; // modal aberto?
-  let confirmTargetId: number | null = null; // id alvo do modal
-  let filtro = "";
-
-  // Dicionários para mapear os códigos para nomes legíveis
-  let teacherMap: Record<number, string> = {};
-  let modalityMap: Record<number, string> = {};
-
-  async function filtraTurmas(){
-    try {
-      // Filtra turmas passando o horário ou critério aceito pela sua API
-      const res = await api.get(`/turmas?horario=${encodeURIComponent(filtro)}`);
-      const body = res.data as ApiResponse<ClassItem[]>;
-      if (body.success) {
-        classes = body.data ?? [];
-      } else {
-        error = body.message;
-      }
-    } catch (e: any) {
-      console.error('Erro ao filtrar turmas:', e);
-      const body = e.response?.data as ApiResponse<ClassItem[]> | undefined;
-      error = body?.message || 'Erro ao carregar turmas';
-    } finally {
-      loading = false;
-    }
+  interface Aluno {
+    id: number;
+    login: string;
+    email: string;
   }
 
-  // Abre modal de confirmação
-  function openConfirm(id: number) {
-    confirmTargetId = id;
-    confirmOpen = true;
-  }
-  // Fecha modal
-  function closeConfirm() {
-    confirmOpen = false;
-    confirmTargetId = null;
-  }
+  let modo: 'lista' | 'alunos' | 'criar' | 'editar' = 'lista';
 
-  // Confirma remoção
-  function handleConfirm() {
-    if (confirmTargetId !== null) {
-      handleDelete(confirmTargetId);
-    }
-    closeConfirm();
-  }
+  let turmas: Turma[] = [];
+  let turmaSelecionada: Turma | null = null;
+  let alunos: Aluno[] = [];
+  let turmaEditando: Turma | null = null;
 
-  // Cancela remoção
-  function handleCancel() {
-    closeConfirm();
-  }
+  let modalidades: Modalidade[] = [];
+  let professores: Professor[] = [];
+  let usuarioLogado: UsuarioLogado | null = null;
 
-  async function handleDelete(id: number) {
-    deletingId = id;
-    error = '';
-    try {
-      const res = await api.delete(`/turmas/${id}`);
-      const body = res.data as ApiResponse<null>;
-      if (!body.success) {
-        error = body.message;
-        return;
-      }
-      classes = classes.filter(c => c.id_turma !== id);
-    } catch (e: any) {
-      console.error('Erro ao deletar turma:', e);
-      const body = e.response?.data as ApiResponse<null> | undefined;
-      error = body?.message || 'Erro ao remover turma.';
-    } finally {
-      deletingId = null;
-    }
-  }
+  let idModalidade = '';
+  let idProfessor = '';
+  let horario = '';
 
-  onMount(async () => {
-    try {
-      // 1. Carrega dados auxiliares (professores) do endpoint /users
-      const resTeachers = await api.get('/users');
-      const bodyTeachers = resTeachers.data as ApiResponse<any[]>;
-      if (bodyTeachers.success && bodyTeachers.data) {
-        bodyTeachers.data.forEach(u => {
-          teacherMap[u.id] = u.login; // Vincula ID do utilizador ao seu login/nome
-        });
-      }
+  let loading = false;
+  let criando = false;
+  let erro = '';
+  let mensagem = '';
 
-      // 2. Carrega dados auxiliares (modalidades)
-      const resModalities = await api.get('/modalidades');
-      const bodyModalities = resModalities.data as ApiResponse<any[]>;
-      if (bodyModalities.success && bodyModalities.data) {
-        bodyModalities.data.forEach(m => {
-          modalityMap[m.id_modalidade] = m.nome;
-        });
-      }
-
-      // 3. Carrega a listagem principal de turmas
-      const resClasses = await api.get('/turmas');
-      const bodyClasses = resClasses.data as ApiResponse<ClassItem[]>;
-      if (bodyClasses.success) {
-        classes = bodyClasses.data ?? [];
-      } else {
-        error = bodyClasses.message;
-      }
-    } catch (e: any) {
-      console.error('Erro ao carregar turmas:', e);
-      const body = e.response?.data as ApiResponse<ClassItem[]> | undefined;
-      error = body?.message || 'Erro ao carregar turmas';
-    } finally {
-      loading = false;
-    }
+  onMount(() => {
+    carregarPagina();
   });
+
+  async function carregarPagina() {
+    loading = true;
+    erro = '';
+
+    try {
+      const [usuarioResponse, turmasResponse] = await Promise.all([
+        api.get<ApiResponse<UsuarioLogado>>('/users/me'),
+        api.get<ApiResponse<Turma[]>>('/turmas')
+      ]);
+
+      if (
+        usuarioResponse.data.success &&
+        usuarioResponse.data.data
+      ) {
+        usuarioLogado = usuarioResponse.data.data;
+      }
+
+      if (
+        turmasResponse.data.success &&
+        turmasResponse.data.data
+      ) {
+        turmas = turmasResponse.data.data;
+      }
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao carregar suas turmas.';
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function carregarDadosCriacao() {
+    try {
+      const [modalidadesResponse, professoresResponse] =
+        await Promise.all([
+          api.get<ApiResponse<Modalidade[]>>('/modalidades'),
+          api.get<ApiResponse<Professor[]>>('/users/professores')
+        ]);
+
+      if (
+        modalidadesResponse.data.success &&
+        modalidadesResponse.data.data
+      ) {
+        modalidades = modalidadesResponse.data.data;
+      }
+
+      if (
+        professoresResponse.data.success &&
+        professoresResponse.data.data
+      ) {
+        professores = professoresResponse.data.data;
+      }
+
+      if (usuarioLogado?.role === 'professor') {
+        idProfessor = String(usuarioLogado.id);
+      }
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao carregar os dados.';
+    }
+  }
+
+  async function abrirCriacao() {
+    erro = '';
+    mensagem = '';
+
+    idModalidade = '';
+    idProfessor = '';
+    horario = '';
+
+    modo = 'criar';
+
+    await carregarDadosCriacao();
+  }
+
+  function voltarLista() {
+    modo = 'lista';
+    turmaSelecionada = null;
+    turmaEditando = null;
+    alunos = [];
+    erro = '';
+    mensagem = '';
+  }
+
+  async function abrirAlunos(turma: Turma) {
+    loading = true;
+    erro = '';
+    mensagem = '';
+    turmaSelecionada = turma;
+
+    try {
+      const response = await api.get<ApiResponse<Aluno[]>>(
+        `/turmas/${turma.id_turma}/alunos`
+      );
+
+      if (
+        response.data.success &&
+        response.data.data
+      ) {
+        alunos = response.data.data;
+        modo = 'alunos';
+      }
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao carregar os alunos.';
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function cancelarMatricula(aluno: Aluno) {
+    if (!turmaSelecionada) return;
+
+    const confirmar = confirm(
+      `Deseja cancelar a matrícula de ${aluno.login}?`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      erro = '';
+      mensagem = '';
+
+      await api.delete(
+        `/turmas/${turmaSelecionada.id_turma}/alunos/${aluno.id}`
+      );
+
+      alunos = alunos.filter(
+        (item) => item.id !== aluno.id
+      );
+
+      turmas = turmas.map((turma) =>
+        turma.id_turma === turmaSelecionada?.id_turma
+          ? {
+              ...turma,
+              quantidade_alunos: Math.max(
+                0,
+                turma.quantidade_alunos - 1
+              )
+            }
+          : turma
+      );
+
+      if (turmaSelecionada) {
+        turmaSelecionada = {
+          ...turmaSelecionada,
+          quantidade_alunos: Math.max(
+            0,
+            turmaSelecionada.quantidade_alunos - 1
+          )
+        };
+      }
+
+      mensagem = 'Matrícula cancelada com sucesso.';
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao cancelar a matrícula.';
+    }
+  }
+
+  async function criarTurma() {
+    erro = '';
+    mensagem = '';
+
+    if (!idModalidade || !horario) {
+      erro = 'Preencha todos os campos.';
+      return;
+    }
+
+    if (
+      usuarioLogado?.role !== 'professor' &&
+      !idProfessor
+    ) {
+      erro = 'Selecione um professor.';
+      return;
+    }
+
+    criando = true;
+
+    try {
+      const professorId =
+        usuarioLogado?.role === 'professor'
+          ? usuarioLogado.id
+          : Number(idProfessor);
+
+      const response = await api.post('/turmas', {
+        id_modalidade: Number(idModalidade),
+        id_professor: professorId,
+        horario
+      });
+
+      if (response.data.success) {
+        idModalidade = '';
+        idProfessor = '';
+        horario = '';
+
+        mensagem = 'Turma criada com sucesso.';
+
+        await carregarPagina();
+
+        modo = 'lista';
+      }
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao criar a turma.';
+    } finally {
+      criando = false;
+    }
+  }
+
+  async function abrirEdicao(turma: Turma) {
+    erro = '';
+    mensagem = '';
+
+    turmaEditando = turma;
+
+    if (
+      modalidades.length === 0 ||
+      professores.length === 0
+    ) {
+      await carregarDadosCriacao();
+    }
+
+    idModalidade = String(
+      modalidades.find(
+        (modalidade) =>
+          modalidade.nome === turma.nome_modalidade
+      )?.id_modalidade ?? ''
+    );
+
+    idProfessor = String(
+      professores.find(
+        (professor) =>
+          professor.login === turma.professor
+      )?.id ?? ''
+    );
+
+    horario = turma.horario;
+
+    modo = 'editar';
+  }
+
+  async function excluirTurma(turma: Turma) {
+    const confirmar = confirm(
+      `Deseja realmente excluir a turma de ${turma.nome_modalidade} às ${turma.horario}?`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      erro = '';
+      mensagem = '';
+
+      await api.delete(`/turmas/${turma.id_turma}`);
+
+      turmas = turmas.filter(
+        (item) => item.id_turma !== turma.id_turma
+      );
+
+      mensagem = 'Turma excluída com sucesso.';
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao excluir a turma.';
+    }
+  }
+
+  async function atualizarTurma() {
+    if (!turmaEditando) return;
+
+    erro = '';
+    mensagem = '';
+
+    if (!idModalidade || !horario) {
+      erro = 'Preencha todos os campos.';
+      return;
+    }
+
+    if (
+      usuarioLogado?.role !== 'professor' &&
+      !idProfessor
+    ) {
+      erro = 'Selecione um professor.';
+      return;
+    }
+
+    criando = true;
+
+    try {
+      const professorId =
+        usuarioLogado?.role === 'professor'
+          ? usuarioLogado.id
+          : Number(idProfessor);
+
+      await api.put(
+        `/turmas/${turmaEditando.id_turma}`,
+        {
+          id_modalidade: Number(idModalidade),
+          id_professor: professorId,
+          horario
+        }
+      );
+
+      mensagem = 'Turma atualizada com sucesso.';
+
+      await carregarPagina();
+
+      turmaEditando = null;
+      modo = 'lista';
+
+      idModalidade = '';
+      idProfessor = '';
+      horario = '';
+    } catch (error: any) {
+      erro =
+        error?.response?.data?.message ||
+        'Erro ao atualizar a turma.';
+    } finally {
+      criando = false;
+    }
+  }
 </script>
 
-{#if loading}
-  <div class="my-8 text-center text-gray-500">Carregando turmas...</div>
-{:else if error}
-  <div class="my-8 text-center text-red-500">{error}</div>
-{:else}
-  <!-- Tabela para telas médias/grandes -->
-  <div class="hidden xl:block">
-    <!-- Busca de turmas -->
-    <div class="w-full max-w-5xl mx-auto mb-2 flex justify-start">
-      <input 
-        type="search" 
-        id="busca" 
-        placeholder="Digite o horário da turma" 
-        bind:value={filtro} 
-        on:input={filtraTurmas}
-        class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
-      >
-    </div>
+{#if modo === 'lista'}
 
-    <Table class="w-full max-w-5xl mx-auto my-4 shadow-lg border border-gray-200 rounded-lg">
-      <TableHead>
-        <TableHeadCell class="w-16">Aula</TableHeadCell>
-        <TableHeadCell class="w-48">Professor</TableHeadCell>
-        <TableHeadCell class="min-w-0">Modalidade</TableHeadCell>
-        <TableHeadCell class="min-w-0">Horário</TableHeadCell>
-        <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
-      </TableHead>
-      <TableBody>
-        {#each classes as c}
-          <TableBodyRow>
-            <TableBodyCell>{c.id_turma}</TableBodyCell>
-            <TableBodyCell>{teacherMap[c.id_professor] || `ID: ${c.id_professor}`}</TableBodyCell>
-            <TableBodyCell class="font-medium text-gray-900">{modalityMap[c.id_modalidade] || `ID: ${c.id_modalidade}`}</TableBodyCell>
-            <TableBodyCell>{c.horario}</TableBodyCell>
-            <TableBodyCell>
-              <!-- Botão editar -->
-              <button
-                class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
-                title="Editar"
-                on:click={() => goto(`/turmas/edit/${c.id_turma}`)}
-              >
-                <EditOutline class="w-5 h-5 text-primary-500" />
-              </button>
-              <!-- Botão remover -->
-              <button
-                title="Remover"
-                class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(c.id_turma)}
-                disabled={deletingId === c.id_turma || loading}
-              >
-                <TrashBinOutline class="w-5 h-5 text-red-400" />
-              </button>
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Turmas</h1>
+
+    <button
+      class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+      on:click={abrirCriacao}
+    >
+      + Criar
+    </button>
   </div>
 
-  <!-- Cards para telas pequenas -->
-  <div class="block xl:hidden">
-    <div class="w-full px-4 mb-2 flex justify-center">
-      <input 
-        type="search" 
-        id="busca-mobile" 
-        placeholder="Digite o horário da turma" 
-        bind:value={filtro} 
-        on:input={filtraTurmas}
-        class="w-full max-w-sm border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
-      >
+  {#if erro}
+    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+      {erro}
     </div>
+  {/if}
 
-    <div class="flex flex-col items-center gap-4 my-4 max-w-3xl mx-auto md:grid md:grid-cols-2">
-      {#each classes as c}
-        <!-- Card da turma -->
-        <Card class="max-w-sm w-full p-0 overflow-hidden shadow-lg border border-gray-200">
-          <div class="px-4 pt-4 pb-2 bg-gray-100 text-left flex items-center justify-between">
-            <div>
-              <div class="text-lg font-semibold text-gray-800 text-left">{modalityMap[c.id_modalidade] || `Modalidade: ${c.id_modalidade}`}</div>
-              <div class="text-xs text-gray-400 text-left">ID Turma: {c.id_turma}</div>
-            </div>
-            <div class="flex gap-2">
-              <!-- Botão editar -->
+  {#if mensagem}
+    <div class="mb-4 rounded-lg bg-green-100 p-4 text-green-700">
+      {mensagem}
+    </div>
+  {/if}
+
+  {#if loading}
+    <p>Carregando...</p>
+  {:else if turmas.length === 0}
+    <Card>
+      <div class="p-6 text-center">
+        <h2 class="text-lg font-semibold">
+          Nenhuma turma encontrada
+        </h2>
+
+        <p class="mt-2 text-gray-500">
+          Você ainda não possui turmas cadastradas.
+        </p>
+      </div>
+    </Card>
+  {:else}
+
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+      {#each turmas as turma}
+
+        <Card class="h-full transition hover:shadow-lg">
+          <div class="p-2">
+
+            <button
+              class="w-full text-left"
+              on:click={() => abrirAlunos(turma)}
+            >
+              <h2 class="text-xl font-bold">
+                {turma.nome_modalidade}
+              </h2>
+
+              <p class="mt-3 text-gray-600">
+                Horário: {turma.horario}
+              </p>
+
+              <p class="text-gray-600">
+                Professor: {turma.professor}
+              </p>
+
+              <p class="mt-3 font-medium">
+                Alunos matriculados:
+                {turma.quantidade_alunos}
+              </p>
+            </button>
+
+            <div class="mt-5 flex gap-3 border-t pt-4">
+
               <button
-                class="p-2 rounded border border-primary-200 hover:border-primary-400 transition bg-transparent"
-                title="Editar"
-                on:click={() => goto(`/turmas/edit/${c.id_turma}`)}
+                class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                on:click={() => abrirEdicao(turma)}
               >
-                <EditOutline class="w-5 h-5 text-primary-500" />
+                Editar
               </button>
-              <!-- Botão remover -->
+
               <button
-                title="Remover"
-                class="p-2 rounded border border-red-100 hover:border-red-300 transition bg-transparent"
-                on:click={() => openConfirm(c.id_turma)}
-                disabled={deletingId === c.id_turma || loading}
+                class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                on:click={() => excluirTurma(turma)}
               >
-                <TrashBinOutline class="w-5 h-5 text-red-400" />
+                Excluir
               </button>
+
             </div>
-          </div>
-          <div class="px-4 pb-4 pt-2 flex flex-col gap-2 text-left">
-            <div class="text-sm text-gray-700">
-              <span class="font-medium">Professor:</span> {teacherMap[c.id_professor] || `ID: ${c.id_professor}`}
-            </div>
-            <div class="text-xs text-gray-500">
-              Horário: {c.horario}
-            </div>
+
           </div>
         </Card>
-      {/each}
-    </div>
-  </div>
-{/if}
 
-<!-- Modal de confirmação -->
-<ConfirmModal
-  open={confirmOpen}
-  message="Tem certeza que deseja remover esta turma?"
-  confirmText="Remover"
-  cancelText="Cancelar"
-  onConfirm={handleConfirm}
-  onCancel={handleCancel}
-/>
+      {/each}
+
+    </div>
+
+  {/if}
+
+{:else if modo === 'alunos'}
+
+  <div class="mb-6 flex items-center justify-between">
+
+    <div>
+      <h1 class="text-2xl font-bold">
+        {turmaSelecionada?.nome_modalidade}
+      </h1>
+
+      <p class="text-gray-600">
+        Horário: {turmaSelecionada?.horario}
+      </p>
+    </div>
+
+    <button
+      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      on:click={voltarLista}
+    >
+      Voltar
+    </button>
+
+  </div>
+
+  {#if erro}
+    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+      {erro}
+    </div>
+  {/if}
+
+  {#if mensagem}
+    <div class="mb-4 rounded-lg bg-green-100 p-4 text-green-700">
+      {mensagem}
+    </div>
+  {/if}
+
+  {#if loading}
+
+    <p>Carregando...</p>
+
+  {:else if alunos.length === 0}
+
+    <Card>
+      <div class="p-6 text-center">
+        <h2 class="text-lg font-semibold">
+          Nenhum aluno matriculado
+        </h2>
+      </div>
+    </Card>
+
+  {:else}
+
+    <div class="overflow-x-auto">
+
+      <table class="w-full text-left text-sm text-gray-500">
+
+        <thead class="bg-gray-100 text-xs uppercase text-gray-700">
+          <tr>
+            <th class="px-6 py-3">Aluno</th>
+            <th class="px-6 py-3">E-mail</th>
+            <th class="px-6 py-3 text-right">Ação</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {#each alunos as aluno}
+
+            <tr class="border-b bg-white">
+
+              <td class="px-6 py-4 font-medium text-gray-900">
+                {aluno.login}
+              </td>
+
+              <td class="px-6 py-4">
+                {aluno.email}
+              </td>
+
+              <td class="px-6 py-4 text-right">
+
+                <button
+                  class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                  on:click={() => cancelarMatricula(aluno)}
+                >
+                  Cancelar
+                </button>
+
+              </td>
+
+            </tr>
+
+          {/each}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  {/if}
+
+{:else if modo === 'criar'}
+
+  <div class="mb-6 flex items-center justify-between">
+
+    <h1 class="text-2xl font-bold">
+      Criar Turma
+    </h1>
+
+    <button
+      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      on:click={voltarLista}
+    >
+      Voltar
+    </button>
+
+  </div>
+
+  {#if erro}
+    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+      {erro}
+    </div>
+  {/if}
+
+  <Card>
+
+    <form
+      on:submit|preventDefault={criarTurma}
+      class="space-y-5"
+    >
+
+      <div>
+
+        <label
+          for="modalidade"
+          class="mb-2 block text-sm font-medium text-gray-900"
+        >
+          Modalidade
+        </label>
+
+        <select
+          id="modalidade"
+          bind:value={idModalidade}
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+        >
+
+          <option value="">
+            Selecione uma modalidade
+          </option>
+
+          {#each modalidades as modalidade}
+
+            <option value={modalidade.id_modalidade}>
+              {modalidade.nome}
+            </option>
+
+          {/each}
+
+        </select>
+
+      </div>
+
+      {#if usuarioLogado?.role !== 'professor'}
+
+        <div>
+
+          <label
+            for="professor"
+            class="mb-2 block text-sm font-medium text-gray-900"
+          >
+            Professor
+          </label>
+
+          <select
+            id="professor"
+            bind:value={idProfessor}
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          >
+
+            <option value="">
+              Selecione um professor
+            </option>
+
+            {#each professores as professor}
+
+              <option value={professor.id}>
+                {professor.login}
+              </option>
+
+            {/each}
+
+          </select>
+
+        </div>
+
+      {/if}
+
+      <div>
+
+        <label
+          for="horario"
+          class="mb-2 block text-sm font-medium text-gray-900"
+        >
+          Horário
+        </label>
+
+        <input
+          id="horario"
+          type="time"
+          bind:value={horario}
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+        />
+
+      </div>
+
+      <button
+        type="submit"
+        disabled={criando}
+        class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+      >
+        {criando ? 'Criando...' : 'Criar Turma'}
+      </button>
+
+    </form>
+
+  </Card>
+
+{:else if modo === 'editar'}
+
+  <div class="mb-6 flex items-center justify-between">
+
+    <h1 class="text-2xl font-bold">
+      Editar Turma
+    </h1>
+
+    <button
+      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      on:click={voltarLista}
+    >
+      Voltar
+    </button>
+
+  </div>
+
+  {#if erro}
+    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+      {erro}
+    </div>
+  {/if}
+
+  <Card>
+
+    <form
+      on:submit|preventDefault={atualizarTurma}
+      class="space-y-5"
+    >
+
+      <div>
+
+        <label
+          for="modalidade-editar"
+          class="mb-2 block text-sm font-medium text-gray-900"
+        >
+          Modalidade
+        </label>
+
+        <select
+          id="modalidade-editar"
+          bind:value={idModalidade}
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+        >
+
+          <option value="">
+            Selecione uma modalidade
+          </option>
+
+          {#each modalidades as modalidade}
+
+            <option value={modalidade.id_modalidade}>
+              {modalidade.nome}
+            </option>
+
+          {/each}
+
+        </select>
+
+      </div>
+
+      {#if usuarioLogado?.role !== 'professor'}
+
+        <div>
+
+          <label
+            for="professor-editar"
+            class="mb-2 block text-sm font-medium text-gray-900"
+          >
+            Professor
+          </label>
+
+          <select
+            id="professor-editar"
+            bind:value={idProfessor}
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          >
+
+            <option value="">
+              Selecione um professor
+            </option>
+
+            {#each professores as professor}
+
+              <option value={professor.id}>
+                {professor.login}
+              </option>
+
+            {/each}
+
+          </select>
+
+        </div>
+
+      {/if}
+
+      <div>
+
+        <label
+          for="horario-editar"
+          class="mb-2 block text-sm font-medium text-gray-900"
+        >
+          Horário
+        </label>
+
+        <input
+          id="horario-editar"
+          type="time"
+          bind:value={horario}
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+        />
+
+      </div>
+
+      <button
+        type="submit"
+        disabled={criando}
+        class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+      >
+        {criando ? 'Salvando...' : 'Salvar alterações'}
+      </button>
+
+    </form>
+
+  </Card>
+
+{/if}
