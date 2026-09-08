@@ -1,4 +1,3 @@
-```svelte
 <script lang="ts">
   import {
     Card,
@@ -660,4 +659,3 @@
   {/if}
 
 </div>
-```
