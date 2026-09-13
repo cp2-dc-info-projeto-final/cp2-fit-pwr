@@ -323,7 +323,7 @@
                 bind:value={alunoSelecionado}
                 class="mt-1"
               >
-                <option value="">
+                <option value="" disabled selected hidden>
                   Selecione um aluno
                 </option>
 
@@ -420,7 +420,7 @@
                 bind:value={exercicioSelecionado}
                 class="mt-1"
               >
-                <option value="">
+                <option value="" disabled selected hidden>
                   Selecione um exercício
                 </option>
 

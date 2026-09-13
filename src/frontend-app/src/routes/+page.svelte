@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import { getCurrentUser } from '$lib/auth';
 
-	let usuarioLogado = false;
+	let usuarioLogado = true;
 	let imagemAtual = 0;
 
 	const imagens = [
@@ -20,12 +20,6 @@
 	];
 
 	onMount(async () => {
-		const user = await getCurrentUser();
-
-		if (user) {
-			usuarioLogado = true;
-		}
-
 		// Troca automaticamente a imagem a cada 5 segundos
 		const intervalo = setInterval(() => {
 			imagemAtual = (imagemAtual + 1) % imagens.length;
@@ -38,7 +32,7 @@
 		if (usuarioLogado) {
 			await goto('/about');
 		} else {
-			await goto('/login');
+			await goto('/about');
 		}
 	}
 

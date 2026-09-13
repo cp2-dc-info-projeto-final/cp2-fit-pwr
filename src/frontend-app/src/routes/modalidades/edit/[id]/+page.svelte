@@ -9,4 +9,4 @@
 </script>
 
 <!-- Utiliza o componente ModalidadeForm passando id -->
-<UserForm id={Number(id)} />
+<ModalidadeForm id={Number(id)} />
