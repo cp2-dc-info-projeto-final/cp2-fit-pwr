@@ -107,17 +107,7 @@
   <!-- Tabela para telas médias/grandes -->
   <div class="hidden xl:block">
     <!-- Busca de modalidades -->
-    <div class="w-full max-w-5xl mx-auto mb-2 flex justify-start">
-      <input 
-        type="search" 
-        id="busca" 
-        placeholder="Digite o nome da modalidade" 
-        bind:value={filtro} 
-        on:input={filtraModalidades}
-        class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500"
-      >
-    </div>
-    
+    <input type="search" id="busca" placeholder="Nome da modalidade" bind:value={filtro} on:input={filtraModalidades} class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500">
     <Table class="w-full max-w-5xl mx-auto my-4 shadow-lg border border-gray-200 rounded-lg">
       <TableHead>
         <TableHeadCell class="w-24">ID</TableHeadCell>

@@ -55,7 +55,7 @@
 </script>
 
 <!-- COR DE FUNDO  -->
-<div class="min-h-screen w-full bg-gray-90 text-gray-100 transition-colors">
+<div class="min-h-screen w-full bg-gray-900 text-gray-100 transition-colors">
     <Menu />
 
     <!-- HERO -->

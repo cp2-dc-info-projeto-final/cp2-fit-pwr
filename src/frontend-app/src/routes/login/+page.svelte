@@ -44,9 +44,9 @@
   <title>Login - Projeto Modelo 2025</title>
 </svelte:head>
 
-<div class="h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+<div class="h-screen flex flex-col items-center justify-center bg-gray-900 text-gray-100 transition-colors">
   <div class="w-full max-w-sm">
-    <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">
+    <h2 class="text-center text-3xl font-extrabold mb-6">
       Login
     </h2>
     

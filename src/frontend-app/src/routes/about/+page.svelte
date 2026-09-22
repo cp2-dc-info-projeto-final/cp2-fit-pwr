@@ -59,11 +59,12 @@
   }
 </script>
 
+
+
 <svelte:head>
   <title>CP2FIT - Matrículas</title>
 </svelte:head>
-
-<div class="min-h-screen bg-gray-100 py-12 px-6">
+<div class="min-h-screen w-full bg-gray-900 text-gray-100 transition-colors">
   
   <!-- Título -->
   <div class="text-center mb-12">
@@ -71,9 +72,8 @@
       Planos CP2FIT
     </Heading>
 
-    <P class="text-lg text-gray-600 max-w-2xl mx-auto">
-      Escolha o plano ideal para alcançar seus objetivos e transformar sua rotina com saúde e qualidade de vida.
-    </P>
+
+    <br>
   </div>
 
   <!-- Grid de planos -->

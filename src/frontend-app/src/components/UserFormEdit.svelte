@@ -102,7 +102,6 @@
     goto('/users');
   }
 </script>
-
 <!-- Card do formulário -->
 <Card class="max-w-md mx-auto mt-10 p-0 overflow-hidden shadow-lg border border-gray-200 rounded-lg">
   <!-- Formulário principal -->
