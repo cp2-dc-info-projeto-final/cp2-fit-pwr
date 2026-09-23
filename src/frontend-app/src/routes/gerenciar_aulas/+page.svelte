@@ -1,5 +1,6 @@
 <script lang="ts">
   import CreateAulaForm from '../../components/CreateAulaForm.svelte';
 </script>
-
-<CreateAulaForm />
+<div class="p-30">
+  <CreateAulaForm />
+</div>

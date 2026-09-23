@@ -83,7 +83,7 @@
     try {
       const [alunosRes, exerciciosRes] = await Promise.all([
         api.get('/users'),
-        api.get('/exercicios')
+        api.get('treinos/exercicios')
       ]);
 
       const alunosBody = alunosRes.data as ApiResponse<Aluno[]>;

@@ -388,7 +388,7 @@
 
 {#if modo === 'lista'}
 
-  <div class="mb-6 flex items-center justify-between">
+  <div class="p-8 mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-bold">Turmas</h1>
 
     <button

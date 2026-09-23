@@ -50,7 +50,7 @@ function sendError(res, status, message, errors = []) {
 router.get(
   '/',
   verifyToken,
-  isAdmin,
+//isAdmin,
   async function(req, res) {
 
     try {
