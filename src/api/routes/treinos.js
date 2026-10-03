@@ -21,112 +21,6 @@ function sendError(res, status, message, errors = []) {
   });
 }
 
-
-/*
-========================================================
-GET /treinos/me
-Busca o plano de treino do aluno logado
-========================================================
-*/
-
-router.get('/me', verifyToken, async function(req, res) {
-  try {
-    const idUsuario = req.user.id;
-
-    const planos = await pool.query(
-      `
-      SELECT
-        p.id_plano,
-        p.nome AS nome_plano,
-        p.descricao,
-        p.id_professor,
-        prof.login AS professor
-      FROM plano_treino p
-      LEFT JOIN usuario prof
-        ON p.id_professor = prof.id
-      WHERE p.id_usuario = $1
-      ORDER BY p.id_plano
-      `,
-      [idUsuario]
-    );
-
-    const resultado = [];
-
-    for (const plano of planos.rows) {
-
-      const treinos = await pool.query(
-        `
-        SELECT
-          id_treino,
-          nome,
-          dia_semana
-        FROM treino
-        WHERE id_plano = $1
-        ORDER BY id_treino
-        `,
-        [plano.id_plano]
-      );
-
-      for (const treino of treinos.rows) {
-
-        const exercicios = await pool.query(
-          `
-          SELECT
-            te.id,
-            te.series,
-            te.repeticoes,
-            te.carga,
-            te.descanso,
-            te.ordem,
-            te.observacao,
-
-            e.id_exercicio,
-            e.nome AS exercicio,
-            e.grupo_muscular,
-            e.descricao,
-            e.imagem
-
-          FROM treino_exercicio te
-
-          INNER JOIN exercicio e
-            ON te.id_exercicio = e.id_exercicio
-
-          WHERE te.id_treino = $1
-
-          ORDER BY te.ordem
-          `,
-          [treino.id_treino]
-        );
-
-        treino.exercicios = exercicios.rows;
-      }
-
-      resultado.push({
-        ...plano,
-        treinos: treinos.rows
-      });
-    }
-
-    return sendSuccess(
-      res,
-      200,
-      null,
-      resultado
-    );
-
-  } catch (error) {
-
-    console.error('Erro ao buscar treino do aluno:', error);
-
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
-  }
-});
-
-
 /*
 ========================================================
 POST /treinos
@@ -361,6 +255,46 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
   }
 });
 
+/*
+========================================================
+GET /exercicios
+Busca a lista de todos os exercícios cadastrados
+========================================================
+*/
+
+router.get('/exercicios', async function(req, res) {
+  try {
+    // Busca todos os campos mapeados na tabela 'exercicio'
+    const exercicios = await pool.query(
+      `
+      SELECT 
+        id_exercicio, 
+        nome, 
+        grupo_muscular, 
+        descricao, 
+        imagem 
+      FROM exercicio
+      `
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      null,
+      exercicios.rows
+    );
+
+  } catch (error) {
+
+    console.error('Erro ao buscar exercícios:', error);
+
+    return sendError(
+      res,
+      500,
+      'Erro interno do servidor'
+    );
+  }
+});
 
 /*
 ========================================================

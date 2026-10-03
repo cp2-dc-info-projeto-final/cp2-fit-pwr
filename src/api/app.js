@@ -12,6 +12,7 @@ var modalidadesRouter = require('./routes/modalidades');
 var turmasRouter = require('./routes/turmas');
 var aulaRouter = require('./routes/aula');
 var treinosRouter = require('./routes/treinos');
+var exerciciosRouter = require('./routes/exercicios');
 
 var app = express();
 
@@ -34,6 +35,7 @@ app.use('/modalidades', modalidadesRouter);
 app.use('/turmas', turmasRouter);
 app.use('/aulas', aulaRouter);
 app.use('/treinos', treinosRouter);
+app.use('/exercicios', exerciciosRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

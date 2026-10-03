@@ -311,3 +311,17 @@ VALUES
     'noite',
     'user'
 );
+
+INSERT INTO exercicio (
+    nome,
+    grupo_muscular,
+    descricao,
+    imagem
+)
+VALUES
+(
+    'Supino reto com halteres',
+    'peito',
+    'Exercício para fortalecer o peito',
+    ''
+);

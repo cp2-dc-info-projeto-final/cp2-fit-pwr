@@ -82,7 +82,7 @@
 
     try {
       const [alunosRes, exerciciosRes] = await Promise.all([
-        api.get('/users'),
+        api.get('/users/alunos'),
         api.get('treinos/exercicios')
       ]);
 

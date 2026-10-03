@@ -50,7 +50,7 @@ function sendError(res, status, message, errors = []) {
 router.get(
   '/',
   verifyToken,
-//isAdmin,
+  isAdmin,
   async function(req, res) {
 
     try {
@@ -219,6 +219,66 @@ router.get(
 
       console.error(
         'Erro ao buscar professores:',
+        error
+      );
+
+      return sendError(
+        res,
+        500,
+        'Erro interno do servidor'
+      );
+    }
+  }
+);
+
+// ========================================================
+// GET /users/alunos
+// Buscar alunos
+// ADMIN OU PROFESSOR
+// ========================================================
+
+router.get(
+  '/alunos',
+  verifyToken,
+  async function(req, res) {
+
+    try {
+
+      if (
+        req.user.role !== 'admin' &&
+        req.user.role !== 'professor'
+      ) {
+
+        return sendError(
+          res,
+          403,
+          'Acesso negado'
+        );
+      }
+
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          login,
+          email,
+          horario,
+          role
+        FROM usuario
+        `
+      );
+
+      return sendSuccess(
+        res,
+        200,
+        null,
+        result.rows
+      );
+
+    } catch (error) {
+
+      console.error(
+        'Erro ao buscar alunos:',
         error
       );
 
