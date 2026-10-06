@@ -9,49 +9,21 @@
 
   const planos = [
     {
-      nome: 'Plano Básico',
-      preco: 'R$ 59,90',
-      descricao: 'Ideal para iniciantes.',
-      beneficios: [
-        'Acesso à musculação',
-        'Treino funcional',
-        'Horário comercial'
-      ],
-      cor: 'blue'
-    },
-    {
-      nome: 'Plano Premium',
-      preco: 'R$ 89,90',
-      descricao: 'Mais liberdade para treinar.',
+      nome: 'Plano completo',
+      preco: 'R$ 79,90',
+      descricao: 'Para todos os publicos.',
       beneficios: [
         'Acesso ilimitado',
-        'Área cardio',
-        'Aulas coletivas'
-      ],
-      cor: 'green'
-    },
-    {
-      nome: 'Plano Fitness',
-      preco: 'R$ 119,90',
-      descricao: 'Foco em performance.',
-      beneficios: [
-        'Personal trainer',
-        'Avaliação física',
-        'Nutricionista'
-      ],
-      cor: 'purple'
-    },
-    {
-      nome: 'Plano VIP',
-      preco: 'R$ 159,90',
-      descricao: 'Experiência completa.',
-      beneficios: [
-        'Todos os benefícios',
-        'Área exclusiva',
-        'Spa e recovery'
+        'Treino funcional',
+        'Horário comercial',
+        'Aréa cardio',
+        'Aulas coletivas',
+        'Disponibilidade de personal trainer',
+        
       ],
       cor: 'red'
-    }
+    },
+    
   ];
 
   function matricular(plano: string) {
