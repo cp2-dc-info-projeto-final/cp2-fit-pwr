@@ -2,9 +2,7 @@ export interface User {
   id: number;
   login: string;
   email: string;
-  horario: string;
   role: string;
-
 }
 
 export interface UserFormData {

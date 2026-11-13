@@ -1,4 +1,8 @@
-import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
+import axios, {
+  type AxiosResponse,
+  type AxiosError
+} from 'axios';
+
 import { removeToken } from './auth';
 
 export interface ApiFieldError {
@@ -21,51 +25,50 @@ export interface ApiFailure {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
 
-// Cria uma instância global do axios para API backend na porta 3000
+// Instância global da API.
 const api = axios.create({
   baseURL: 'http://localhost:3000',
-  withCredentials: true, // Útil para CORS com cookies/sessão
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
+    'Accept': 'application/json'
+  }
 });
 
-// Interceptor para adicionar automaticamente o token Bearer
+// Adiciona automaticamente o token Bearer.
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('auth_token');
 
-      console.log('TOKEN ENCONTRADO:', token);
-
-      if (token) {
+      // Não substitui um Authorization enviado especificamente
+      // pela página de matrícula.
+      if (token && !config.headers?.Authorization) {
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
-
-        console.log('AUTHORIZATION ENVIADO:', config.headers.Authorization);
       }
     }
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Interceptor para lidar com respostas 401 (token expirado)
+// Trata respostas de token inválido ou expirado.
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Token inválido ou expirado, remover usando função centralizada
+    if (
+      error.response?.status === 401 &&
+      typeof window !== 'undefined'
+    ) {
       removeToken();
-      // Redirecionar para login se não estiver na página de login
+
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
+
     return Promise.reject(error);
   }
 );

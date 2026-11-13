@@ -13,6 +13,7 @@ var turmasRouter = require('./routes/turmas');
 var aulaRouter = require('./routes/aula');
 var treinosRouter = require('./routes/treinos');
 var exerciciosRouter = require('./routes/exercicios');
+var matriculaRouter = require('./routes/matricula');
 
 var app = express();
 
@@ -36,6 +37,7 @@ app.use('/turmas', turmasRouter);
 app.use('/aulas', aulaRouter);
 app.use('/treinos', treinosRouter);
 app.use('/exercicios', exerciciosRouter);
+app.use('/matricula', matriculaRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

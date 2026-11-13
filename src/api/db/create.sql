@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS exercicio CASCADE;
 DROP TABLE IF EXISTS plano_treino CASCADE;
 DROP TABLE IF EXISTS treino CASCADE;
 DROP TABLE IF EXISTS treino_exercicio CASCADE;
+DROP TABLE IF EXISTS matricula CASCADE;
 
 
 -- =========================================================
@@ -59,6 +60,38 @@ CREATE TABLE usuario (
         CHECK (
             role IN ('admin', 'user', 'professor')
         )
+);
+
+-- =========================================================
+-- MATRÍCULA / PLANO ÚNICO DA ACADEMIA
+-- =========================================================
+
+CREATE TABLE matricula (
+    id_matricula BIGINT GENERATED ALWAYS AS IDENTITY,
+    id_usuario BIGINT NOT NULL,
+    valor NUMERIC(10,2) NOT NULL DEFAULT 80.00,
+    status_pagamento TEXT NOT NULL DEFAULT 'pendente',
+    status TEXT NOT NULL DEFAULT 'pendente',
+    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_pagamento TIMESTAMP,
+
+    CONSTRAINT pk_matricula PRIMARY KEY (id_matricula),
+
+    CONSTRAINT fk_matricula_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uk_matricula_usuario UNIQUE (id_usuario),
+
+    CONSTRAINT ck_matricula_valor
+        CHECK (valor = 80.00),
+
+    CONSTRAINT ck_matricula_pagamento
+        CHECK (status_pagamento IN ('pendente', 'aprovado')),
+
+    CONSTRAINT ck_matricula_status
+        CHECK (status IN ('pendente', 'ativa', 'cancelada'))
 );
 
 

@@ -120,11 +120,22 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
     const hashedPassword = await bcrypt.hash(senha, 12);
 
     const result = await pool.query(
-      'INSERT INTO usuario (login, email, senha, role) VALUES ($1, $2, $3, $4) RETURNING id, login, email, role',
-      [login, email, hashedPassword, role]
-    );
+  'INSERT INTO usuario (login, email, senha, role) VALUES ($1, $2, $3, $4) RETURNING id, login, email, role',
+  [login, email, hashedPassword, role]
+);
 
-    return sendSuccess(res, 201, 'Usuário criado com sucesso', result.rows[0]);
+// Contas de aluno criadas pelo administrador já entram matriculadas.
+if (role === 'user') {
+  await pool.query(
+    `INSERT INTO matricula
+     (id_usuario, valor, status_pagamento, status, data_pagamento)
+     VALUES ($1, 80.00, 'aprovado', 'ativa', CURRENT_TIMESTAMP)
+     ON CONFLICT (id_usuario) DO NOTHING`,
+    [result.rows[0].id]
+  );
+}
+
+return sendSuccess(res, 201, 'Usuário criado com sucesso', result.rows[0]);
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
 
@@ -190,36 +201,31 @@ router.post('/me', verifyToken, async function(req, res) {
 
 /* POST - Cadastro público */
 router.post('/register', async function(req, res) {
+  const { login, email, senha } = req.body;
+  const errors = [];
+
+  if (!login) {
+    errors.push({ field: 'login', message: 'Login é obrigatório' });
+  }
+
+  if (!email) {
+    errors.push({ field: 'email', message: 'Email é obrigatório' });
+  }
+
+  if (!senha || senha.length < 6) {
+    errors.push({
+      field: 'senha',
+      message: 'A senha deve ter pelo menos 6 caracteres'
+    });
+  }
+
+  if (errors.length > 0) {
+    return sendError(res, 400, 'Dados inválidos', errors);
+  }
+
+  let client;
+
   try {
-    const { login, email, senha } = req.body;
-
-    const errors = [];
-
-    if (!login) {
-      errors.push({
-        field: 'login',
-        message: 'Login é obrigatório'
-      });
-    }
-
-    if (!email) {
-      errors.push({
-        field: 'email',
-        message: 'Email é obrigatório'
-      });
-    }
-
-    if (!senha) {
-      errors.push({
-        field: 'senha',
-        message: 'Senha é obrigatória'
-      });
-    }
-
-    if (errors.length > 0) {
-      return sendError(res, 400, 'Dados inválidos', errors);
-    }
-
     const loginExists = await pool.query(
       'SELECT id FROM usuario WHERE login = $1',
       [login]
@@ -227,10 +233,7 @@ router.post('/register', async function(req, res) {
 
     if (loginExists.rows.length > 0) {
       return sendError(res, 409, 'Login já existe', [
-        {
-          field: 'login',
-          message: 'Login já existe'
-        }
+        { field: 'login', message: 'Login já existe' }
       ]);
     }
 
@@ -241,40 +244,66 @@ router.post('/register', async function(req, res) {
 
     if (emailExists.rows.length > 0) {
       return sendError(res, 409, 'Email já existe', [
-        {
-          field: 'email',
-          message: 'Email já existe'
-        }
+        { field: 'email', message: 'Email já existe' }
       ]);
     }
 
+    client = await pool.connect();
+    await client.query('BEGIN');
+
     const senhaHash = await bcrypt.hash(senha, 12);
 
-    const result = await pool.query(
-      `
-      INSERT INTO usuario
-      (login, email, senha, role)
-      VALUES ($1, $2, $3, 'user')
-      RETURNING id, login, email, role
-      `,
+    const userResult = await client.query(
+      `INSERT INTO usuario (login, email, senha, role)
+       VALUES ($1, $2, $3, 'user')
+       RETURNING id, login, email, role`,
       [login, email, senhaHash]
+    );
+
+    const user = userResult.rows[0];
+
+    // Cria uma matrícula pendente para o novo aluno.
+    await client.query(
+      `INSERT INTO matricula
+       (id_usuario, valor, status_pagamento, status)
+       VALUES ($1, 80.00, 'pendente', 'pendente')`,
+      [user.id]
+    );
+
+    await client.query('COMMIT');
+
+    // Token provisório: permite somente finalizar a matrícula.
+    const tokenCadastro = jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+        tipo: 'cadastro'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '30m' }
     );
 
     return sendSuccess(
       res,
       201,
-      'Usuário cadastrado com sucesso',
-      result.rows[0]
+      'Cadastro criado. Finalize a matrícula para ativar sua conta.',
+      { user, tokenCadastro }
     );
 
   } catch (error) {
-    console.error(error);
+    if (client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Erro ao desfazer cadastro:', rollbackError);
+      }
+    }
 
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
+    console.error('Erro no cadastro:', error);
+    return sendError(res, 500, 'Erro interno ao realizar cadastro');
+
+  } finally {
+    if (client) client.release();
   }
 });
 
@@ -283,11 +312,12 @@ router.post('/login', async function(req, res) {
   try {
     const { login, password } = req.body;
 
-    const result = await pool.query(`
-      SELECT id, login, email, senha as passwordHash, role
-      FROM usuario
-      WHERE login = $1
-    `, [login]);
+    const result = await pool.query(
+      `SELECT id, login, email, senha AS "passwordHash", role
+       FROM usuario
+       WHERE login = $1`,
+      [login]
+    );
 
     if (result.rows.length === 0) {
       return sendError(res, 401, 'Credenciais inválidas');
@@ -295,29 +325,53 @@ router.post('/login', async function(req, res) {
 
     const user = result.rows[0];
 
-    bcrypt.compare(password, user.passwordhash, (err, isMatch) => {
-      if (err) {
-        console.error('Erro no bcrypt:', err);
-        return sendError(res, 500, 'Erro interno do servidor');
-      }
+    const isMatch = await bcrypt.compare(
+      password || '',
+      user.passwordHash
+    );
 
-      if (!isMatch) {
-        return sendError(res, 401, 'Credenciais inválidas');
-      }
+    if (!isMatch) {
+      return sendError(res, 401, 'Credenciais inválidas');
+    }
 
-      const token = jwt.sign(
-        {
-          id: user.id,
-          login: user.login,
-          email: user.email,
-          role: user.role
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+    // Alunos precisam ter matrícula ativa e pagamento aprovado.
+    // Professores e administradores continuam entrando normalmente.
+    if (user.role === 'user') {
+      const matricula = await pool.query(
+        `SELECT id_matricula
+         FROM matricula
+         WHERE id_usuario = $1
+           AND status = 'ativa'
+           AND status_pagamento = 'aprovado'`,
+        [user.id]
       );
 
-      return sendSuccess(res, 200, 'Autenticado com sucesso!', { token });
-    });
+      if (matricula.rows.length === 0) {
+        return sendError(
+          res,
+          403,
+          'Sua conta ainda não possui matrícula ativa. Finalize a matrícula para entrar.'
+        );
+      }
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        login: user.login,
+        email: user.email,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      'Autenticado com sucesso!',
+      { token }
+    );
 
   } catch (error) {
     console.error('Erro ao autenticar usuário:', error);
