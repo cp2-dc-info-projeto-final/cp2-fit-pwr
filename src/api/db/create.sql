@@ -24,7 +24,6 @@ CREATE TABLE usuario (
     email TEXT NOT NULL,
     senha TEXT NOT NULL,
 
-    horario TEXT NOT NULL DEFAULT 'manhã',
 
     -- user = aluno
     -- professor = professor
@@ -54,11 +53,6 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_senha_length
         CHECK (
             length(senha) >= 6
-        ),
-
-    CONSTRAINT ck_usuario_horario_valid
-        CHECK (
-            horario IN ('manhã', 'tarde', 'noite')
         ),
 
     CONSTRAINT ck_usuario_role_valid
@@ -293,7 +287,6 @@ INSERT INTO usuario (
     login,
     email,
     senha,
-    horario,
     role
 )
 VALUES

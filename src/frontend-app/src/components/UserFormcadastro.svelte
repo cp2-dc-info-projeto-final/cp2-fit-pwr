@@ -10,7 +10,7 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user', horario: '' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user', }; // dados do form
 
   // Opções de roles
   const roleOptions = [
@@ -130,23 +130,6 @@
         <div class="mt-1 text-sm text-red-500">{errorOf('senha')}</div>
       {/if}
     </div>
-    <!--horarios de disponibilidade-->
-
-      <div>
-        <Label for="horario">Horário</Label>
-      
-        <select
-          id="horario"
-          bind:value={user.horario}
-          required
-          class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        >
-          <option value="" disabled>Selecione o horário</option>
-          <option value="manha">Manhã</option>
-          <option value="tarde">Tarde</option>
-          <option value="noite">Noite</option>
-        </select>
-      </div>
 
     <!-- Botões de ação -->
     <div class="flex gap-4 justify-end mt-4">

@@ -113,7 +113,6 @@
         <TableHeadCell class="w-16">ID</TableHeadCell>
         <TableHeadCell class="w-32">Login</TableHeadCell>
         <TableHeadCell class="min-w-0">Email</TableHeadCell>
-        <TableHeadCell class="min-w-0">Horário</TableHeadCell>
         <TableHeadCell class="w-20">Role</TableHeadCell>
         <TableHeadCell class="w-24"></TableHeadCell> <!-- coluna para editar/remover -->
       </TableHead>
@@ -123,7 +122,6 @@
             <TableBodyCell>{user.id}</TableBodyCell>
             <TableBodyCell>{user.login}</TableBodyCell>
             <TableBodyCell class="truncate max-w-0">{user.email}</TableBodyCell>
-            <TableBodyCell class="truncate max-w-0">{user.horario}</TableBodyCell>
             <TableBodyCell>
               <Badge color={user.role === 'admin' ? 'red' : 'blue'} class="text-xs">
                 {user.role}

@@ -10,19 +10,14 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '',horario: '', role: 'user' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user' }; // dados do form
   
   // Opções de roles
   const roleOptions = [
     { value: 'user', name: 'Usuário' },
     { value: 'admin', name: 'Administrador' }
   ];
-    // Opções de horario
-    const horarioOptions = [
-    { value: 'manhã', name: 'Manhã' },
-    { value: 'tarde', name: 'Tarde' },
-    { value: 'noite', name: 'Noite' }
-  ];
+   
   let loading = false;
   let error = '';
   let fieldErrors: ApiFieldError[] = [];
@@ -144,14 +139,6 @@
       {/if}
     </div>
 
-     <!-- Campo horario -->
-     <div>
-      <Label for="horario">Horário</Label>
-      <Select id="horario" bind:value={user.horario} items={horarioOptions} class="mt-1" />
-      {#if errorOf('horario')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('horario')}</div>
-      {/if}
-    </div>
     <!-- Botões de ação -->
     <div class="flex gap-4 justify-end mt-4">
       <!-- Botão cancelar/voltar -->

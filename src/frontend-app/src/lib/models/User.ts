@@ -12,7 +12,5 @@ export interface UserFormData {
   login: string;
   email: string;
   senha?: string;
-  horario: string;
   role: string;
-
 }
