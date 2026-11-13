@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
@@ -165,7 +166,10 @@
 
         <form
           class="space-y-4"
-          on:submit|preventDefault={finalizarMatricula}
+          onsubmit={(event) => {
+            event.preventDefault();
+            finalizarMatricula();
+          }}
         >
 
           <div>

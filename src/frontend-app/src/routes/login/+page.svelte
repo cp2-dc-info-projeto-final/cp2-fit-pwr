@@ -1,19 +1,20 @@
+
 <script lang="ts">
-  import { Card, Button, Input, Label, Alert } from "flowbite-svelte";
-  import { goto } from "$app/navigation";
-  import { login as authLogin } from "$lib/auth";
-  
+  import { Card, Button, Input, Label, Alert } from 'flowbite-svelte';
+  import { goto } from '$app/navigation';
+  import { login as authLogin } from '$lib/auth';
+
   let login = '';
   let password = '';
   let loading = false;
   let error = '';
-  
+
   async function handleCadastro() {
     await goto('/cadastro');
   }
 
   async function handleLogin() {
-    if (!login || !password) {
+    if (!login.trim() || !password) {
       error = 'Por favor, preencha todos os campos';
       return;
     }
@@ -22,76 +23,104 @@
     error = '';
 
     try {
-      const result = await authLogin({ login, password });
-      
+      const result = await authLogin({
+        login: login.trim(),
+        password
+      });
+
       if (result.success) {
         await goto('/');
       } else {
         error = result.message || 'Credenciais inválidas';
       }
+
     } catch (err) {
-      error = 'Erro interno do servidor';
       console.error('Erro no login:', err);
+      error = 'Erro interno do servidor';
+
     } finally {
       loading = false;
     }
   }
-
-
 </script>
 
 <svelte:head>
-  <title>Login - Projeto Modelo 2025</title>
+  <title>Login - CP2FIT</title>
 </svelte:head>
 
 <div class="h-screen flex flex-col items-center justify-center bg-gray-900 text-gray-100 transition-colors">
+
   <div class="w-full max-w-sm">
+
     <h2 class="text-center text-3xl font-extrabold mb-6">
       Login
     </h2>
-    
+
     <Card class="p-6 w-full">
-      <form on:submit|preventDefault={handleLogin} class="space-y-6">
-          <div>
-            <Label for="login" class="mb-2">Login</Label>
-            <Input
-              id="login"
-              type="text"
-              bind:value={login}
-              placeholder="Digite seu login"
-              required
-            />
-          </div>
 
-          <div>
-            <Label for="password" class="mb-2">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              bind:value={password}
-              placeholder="Digite sua senha"
-              required
-            />
-          </div>
+      <form
+        onsubmit={(event) => {
+          event.preventDefault();
+          handleLogin();
+        }}
+        class="space-y-6"
+      >
 
-          {#if error}
-            <Alert color="red" class="mb-4">
-              {error}
-            </Alert>
-          {/if}
+        <div>
+          <Label for="login" class="mb-2">
+            Login
+          </Label>
 
-          <Button 
-            type="submit"
-            class="w-full" 
-            disabled={loading}
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </Button>
+          <Input
+            id="login"
+            type="text"
+            bind:value={login}
+            placeholder="Digite seu login"
+            required
+          />
+        </div>
 
+        <div>
+          <Label for="password" class="mb-2">
+            Senha
+          </Label>
 
-    <Button type="button"color="light"class="w-full" onclick={handleCadastro}> Criar Conta  </Button>
+          <Input
+            id="password"
+            type="password"
+            bind:value={password}
+            placeholder="Digite sua senha"
+            required
+          />
+        </div>
+
+        {#if error}
+          <Alert color="red" class="mb-4">
+            {error}
+          </Alert>
+        {/if}
+
+        <Button
+          type="submit"
+          class="w-full"
+          disabled={loading}
+        >
+          {loading ? 'Entrando...' : 'Entrar'}
+        </Button>
+
+        <Button
+          type="button"
+          color="light"
+          class="w-full"
+          onclick={handleCadastro}
+        >
+          Criar Conta
+        </Button>
 
       </form>
+
     </Card>
+
   </div>
+
 </div>
