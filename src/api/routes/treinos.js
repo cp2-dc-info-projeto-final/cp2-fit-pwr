@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const pool = require('../db/config');
-const { verifyToken, isAdmin } = require('../middlewares/auth');
+const { verifyToken } = require('../middlewares/auth');
 
 function sendSuccess(res, status, message, data) {
   const payload = { success: true };
@@ -21,6 +21,10 @@ function sendError(res, status, message, errors = []) {
   });
 }
 
+function podeGerenciar(role) {
+  return role === 'professor' || role === 'admin';
+}
+
 /*
 ========================================================
 POST /treinos
@@ -31,11 +35,7 @@ Somente professor ou administrador
 
 router.post('/', verifyToken, async function(req, res) {
   try {
-
-    if (
-      req.user.role !== 'professor' &&
-      req.user.role !== 'admin'
-    ) {
+    if (!podeGerenciar(req.user.role)) {
       return sendError(
         res,
         403,
@@ -68,12 +68,7 @@ router.post('/', verifyToken, async function(req, res) {
     }
 
     if (errors.length > 0) {
-      return sendError(
-        res,
-        400,
-        'Dados inválidos',
-        errors
-      );
+      return sendError(res, 400, 'Dados inválidos', errors);
     }
 
     const aluno = await pool.query(
@@ -87,11 +82,7 @@ router.post('/', verifyToken, async function(req, res) {
     );
 
     if (aluno.rows.length === 0) {
-      return sendError(
-        res,
-        404,
-        'Aluno não encontrado.'
-      );
+      return sendError(res, 404, 'Aluno não encontrado.');
     }
 
     const result = await pool.query(
@@ -104,7 +95,6 @@ router.post('/', verifyToken, async function(req, res) {
         descricao
       )
       VALUES ($1, $2, $3, $4)
-
       RETURNING
         id_plano,
         id_usuario,
@@ -115,7 +105,7 @@ router.post('/', verifyToken, async function(req, res) {
       [
         id_usuario,
         req.user.id,
-        nome,
+        nome.trim(),
         descricao || null
       ]
     );
@@ -128,17 +118,98 @@ router.post('/', verifyToken, async function(req, res) {
     );
 
   } catch (error) {
-
     console.error('Erro ao criar plano de treino:', error);
+    return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
+
+/*
+========================================================
+GET /treinos
+Busca os treinos do aluno autenticado
+========================================================
+*/
+
+router.get('/', verifyToken, async function(req, res) {
+  try {
+
+    if (req.user.role !== 'user') {
+      return sendError(
+        res,
+        403,
+        'Apenas alunos podem acessar seus próprios treinos.'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        t.id_treino,
+        t.nome,
+        t.dia_semana,
+
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'id_exercicio', e.id_exercicio,
+              'nome', e.nome,
+              'grupo_muscular', e.grupo_muscular,
+              'series', te.series,
+              'repeticoes', te.repeticoes,
+              'carga', te.carga,
+              'descanso', te.descanso,
+              'observacao', te.observacao,
+              'ordem', te.ordem
+            )
+            ORDER BY te.ordem
+          ) FILTER (WHERE te.id IS NOT NULL),
+          '[]'::json
+        ) AS exercicios
+
+      FROM plano_treino p
+
+      INNER JOIN treino t
+        ON t.id_plano = p.id_plano
+
+      LEFT JOIN treino_exercicio te
+        ON te.id_treino = t.id_treino
+
+      LEFT JOIN exercicio e
+        ON e.id_exercicio = te.id_exercicio
+
+      WHERE p.id_usuario = $1
+
+      GROUP BY
+        t.id_treino,
+        t.nome,
+        t.dia_semana
+
+      ORDER BY t.id_treino
+      `,
+      [req.user.id]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      'Treinos encontrados com sucesso.',
+      result.rows
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Erro ao buscar treinos do aluno:',
+      error
+    );
 
     return sendError(
       res,
       500,
-      'Erro interno do servidor'
+      'Erro ao buscar treinos.'
     );
   }
 });
-
 
 /*
 ========================================================
@@ -148,13 +219,8 @@ Cria um treino dentro de um plano
 */
 
 router.post('/:id/treinos', verifyToken, async function(req, res) {
-
   try {
-
-    if (
-      req.user.role !== 'professor' &&
-      req.user.role !== 'admin'
-    ) {
+    if (!podeGerenciar(req.user.role)) {
       return sendError(
         res,
         403,
@@ -163,13 +229,13 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
     }
 
     const { id } = req.params;
+    const { nome, dia_semana } = req.body;
 
-    const {
-      nome,
-      dia_semana
-    } = req.body;
-
-    if (!nome || !dia_semana) {
+    if (
+      !nome ||
+      !nome.trim() ||
+      !dia_semana
+    ) {
       return sendError(
         res,
         400,
@@ -196,7 +262,7 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
 
     if (
       req.user.role === 'professor' &&
-      plano.rows[0].id_professor !== req.user.id
+      Number(plano.rows[0].id_professor) !== Number(req.user.id)
     ) {
       return sendError(
         res,
@@ -214,7 +280,6 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
         dia_semana
       )
       VALUES ($1, $2, $3)
-
       RETURNING
         id_treino,
         id_plano,
@@ -223,7 +288,7 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
       `,
       [
         id,
-        nome,
+        nome.trim(),
         dia_semana
       ]
     );
@@ -236,7 +301,6 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
     );
 
   } catch (error) {
-
     console.error('Erro ao criar treino:', error);
 
     if (error.code === '23514') {
@@ -247,11 +311,7 @@ router.post('/:id/treinos', verifyToken, async function(req, res) {
       );
     }
 
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
+    return sendError(res, 500, 'Erro interno do servidor');
   }
 });
 
@@ -264,16 +324,16 @@ Busca a lista de todos os exercícios cadastrados
 
 router.get('/exercicios', async function(req, res) {
   try {
-    // Busca todos os campos mapeados na tabela 'exercicio'
     const exercicios = await pool.query(
       `
-      SELECT 
-        id_exercicio, 
-        nome, 
-        grupo_muscular, 
-        descricao, 
-        imagem 
+      SELECT
+        id_exercicio,
+        nome,
+        grupo_muscular,
+        descricao,
+        imagem
       FROM exercicio
+      ORDER BY nome
       `
     );
 
@@ -285,14 +345,8 @@ router.get('/exercicios', async function(req, res) {
     );
 
   } catch (error) {
-
     console.error('Erro ao buscar exercícios:', error);
-
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
+    return sendError(res, 500, 'Erro interno do servidor');
   }
 });
 
@@ -304,13 +358,8 @@ Adiciona exercício a um treino
 */
 
 router.post('/:id/exercicios', verifyToken, async function(req, res) {
-
   try {
-
-    if (
-      req.user.role !== 'professor' &&
-      req.user.role !== 'admin'
-    ) {
+    if (!podeGerenciar(req.user.role)) {
       return sendError(
         res,
         403,
@@ -349,10 +398,8 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
         t.id_treino,
         p.id_professor
       FROM treino t
-
       INNER JOIN plano_treino p
         ON t.id_plano = p.id_plano
-
       WHERE t.id_treino = $1
       `,
       [id]
@@ -368,7 +415,7 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
 
     if (
       req.user.role === 'professor' &&
-      treino.rows[0].id_professor !== req.user.id
+      Number(treino.rows[0].id_professor) !== Number(req.user.id)
     ) {
       return sendError(
         res,
@@ -407,9 +454,7 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
         ordem,
         observacao
       )
-      VALUES
-      ($1, $2, $3, $4, $5, $6, $7, $8)
-
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
       `,
       [
@@ -417,7 +462,7 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
         id_exercicio,
         series,
         repeticoes,
-        carga || null,
+        carga ?? null,
         descanso,
         ordem,
         observacao || null
@@ -432,11 +477,7 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
     );
 
   } catch (error) {
-
-    console.error(
-      'Erro ao adicionar exercício:',
-      error
-    );
+    console.error('Erro ao adicionar exercício:', error);
 
     if (error.code === '23505') {
       return sendError(
@@ -446,14 +487,9 @@ router.post('/:id/exercicios', verifyToken, async function(req, res) {
       );
     }
 
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
+    return sendError(res, 500, 'Erro interno do servidor');
   }
 });
-
 
 /*
 ========================================================
@@ -463,13 +499,8 @@ Professor/Admin visualiza treino de um aluno
 */
 
 router.get('/aluno/:id', verifyToken, async function(req, res) {
-
   try {
-
-    if (
-      req.user.role !== 'professor' &&
-      req.user.role !== 'admin'
-    ) {
+    if (!podeGerenciar(req.user.role)) {
       return sendError(
         res,
         403,
@@ -488,14 +519,10 @@ router.get('/aluno/:id', verifyToken, async function(req, res) {
         p.descricao,
         p.id_professor,
         prof.login AS professor
-
       FROM plano_treino p
-
       LEFT JOIN usuario prof
         ON p.id_professor = prof.id
-
       WHERE p.id_usuario = $1
-
       ORDER BY p.id_plano
       `,
       [id]
@@ -509,20 +536,10 @@ router.get('/aluno/:id', verifyToken, async function(req, res) {
     );
 
   } catch (error) {
-
-    console.error(
-      'Erro ao buscar treino do aluno:',
-      error
-    );
-
-    return sendError(
-      res,
-      500,
-      'Erro interno do servidor'
-    );
+    console.error('Erro ao buscar treino do aluno:', error);
+    return sendError(res, 500, 'Erro interno do servidor');
   }
 });
-
 
 /*
 ========================================================
@@ -531,70 +548,70 @@ Remove exercício do treino
 ========================================================
 */
 
-router.delete(
-  '/exercicios/:id',
-  verifyToken,
-  async function(req, res) {
-
-    try {
-
-      if (
-        req.user.role !== 'professor' &&
-        req.user.role !== 'admin'
-      ) {
-        return sendError(
-          res,
-          403,
-          'Apenas professores ou administradores podem remover exercícios.'
-        );
-      }
-
-      const { id } = req.params;
-
-      const result = await pool.query(
-        `
-        DELETE FROM treino_exercicio te
-
-        USING treino t, plano_treino p
-
-        WHERE te.id = $1
-        AND te.id_treino = t.id_treino
-        AND t.id_plano = p.id_plano
-
-        RETURNING te.id
-        `,
-        [id]
-      );
-
-      if (result.rows.length === 0) {
-        return sendError(
-          res,
-          404,
-          'Exercício do treino não encontrado.'
-        );
-      }
-
-      return sendSuccess(
-        res,
-        200,
-        'Exercício removido com sucesso'
-      );
-
-    } catch (error) {
-
-      console.error(
-        'Erro ao remover exercício:',
-        error
-      );
-
+router.delete('/exercicios/:id', verifyToken, async function(req, res) {
+  try {
+    if (!podeGerenciar(req.user.role)) {
       return sendError(
         res,
-        500,
-        'Erro interno do servidor'
+        403,
+        'Apenas professores ou administradores podem remover exercícios.'
       );
     }
-  }
-);
 
+    const { id } = req.params;
+
+    const exercicio = await pool.query(
+      `
+      SELECT
+        te.id,
+        p.id_professor
+      FROM treino_exercicio te
+      INNER JOIN treino t
+        ON te.id_treino = t.id_treino
+      INNER JOIN plano_treino p
+        ON t.id_plano = p.id_plano
+      WHERE te.id = $1
+      `,
+      [id]
+    );
+
+    if (exercicio.rows.length === 0) {
+      return sendError(
+        res,
+        404,
+        'Exercício do treino não encontrado.'
+      );
+    }
+
+    if (
+      req.user.role === 'professor' &&
+      Number(exercicio.rows[0].id_professor) !== Number(req.user.id)
+    ) {
+      return sendError(
+        res,
+        403,
+        'Você não pode remover este exercício.'
+      );
+    }
+
+    await pool.query(
+      `
+      DELETE FROM treino_exercicio
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      'Exercício removido com sucesso'
+    );
+
+  } catch (error) {
+    console.error('Erro ao remover exercício:', error);
+    return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
 
 module.exports = router;

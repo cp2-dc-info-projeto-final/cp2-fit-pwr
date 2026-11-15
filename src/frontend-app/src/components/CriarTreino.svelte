@@ -76,6 +76,9 @@
     { value: 'domingo', name: 'Domingo' }
   ];
 
+  /*
+   * Carregar alunos e exercícios
+   */
   async function carregarDados() {
     loading = true;
     error = '';
@@ -83,7 +86,7 @@
     try {
       const [alunosRes, exerciciosRes] = await Promise.all([
         api.get('/users/alunos'),
-        api.get('treinos/exercicios')
+        api.get('/treinos/exercicios')
       ]);
 
       const alunosBody = alunosRes.data as ApiResponse<Aluno[]>;
@@ -102,17 +105,22 @@
       } else {
         error = exerciciosBody.message || 'Erro ao carregar exercícios.';
       }
+
     } catch (e: any) {
-      console.error(e);
+      console.error('Erro ao carregar dados:', e);
 
       error =
         e.response?.data?.message ||
         'Erro ao carregar alunos e exercícios.';
+
     } finally {
       loading = false;
     }
   }
 
+  /*
+   * Adicionar exercício à lista
+   */
   function adicionarExercicio() {
     error = '';
 
@@ -126,8 +134,19 @@
       return;
     }
 
+    if (descanso < 0) {
+      error = 'O descanso não pode ser negativo.';
+      return;
+    }
+
+    if (carga !== null && carga < 0) {
+      error = 'A carga não pode ser negativa.';
+      return;
+    }
+
     const exercicio = exercicios.find(
-      (item) => String(item.id_exercicio) === String(exercicioSelecionado)
+      (item) =>
+        String(item.id_exercicio) === String(exercicioSelecionado)
     );
 
     if (!exercicio) {
@@ -150,10 +169,10 @@
         id_exercicio: exercicio.id_exercicio,
         nome: exercicio.nome,
         grupo_muscular: exercicio.grupo_muscular,
-        series,
-        repeticoes,
-        carga,
-        descanso,
+        series: Number(series),
+        repeticoes: Number(repeticoes),
+        carga: carga === null ? null : Number(carga),
+        descanso: Number(descanso),
         ordem: exerciciosTreino.length + 1,
         observacao
       }
@@ -167,6 +186,9 @@
     observacao = '';
   }
 
+  /*
+   * Remover exercício da lista
+   */
   function removerExercicio(index: number) {
     exerciciosTreino = exerciciosTreino
       .filter((_, i) => i !== index)
@@ -176,6 +198,9 @@
       }));
   }
 
+  /*
+   * Criar plano, treino e exercícios
+   */
   async function criarPlano() {
     error = '';
     sucesso = '';
@@ -203,9 +228,16 @@
     salvando = true;
 
     try {
-      const planoResponse = await api.post('/planos-treino', {
+
+      /*
+       * 1 - Criar o plano de treino
+       *
+       * Rota correta:
+       * POST /treinos
+       */
+      const planoResponse = await api.post('/treinos', {
         id_usuario: Number(alunoSelecionado),
-        nome: nomePlano,
+        nome: nomePlano.trim(),
         descricao: descricaoPlano
       });
 
@@ -218,11 +250,19 @@
 
       const plano = planoBody.data;
 
-      const treinoResponse = await api.post('/treinos', {
-        id_plano: plano.id_plano,
-        nome: nomeTreino,
-        dia_semana: diaSemana
-      });
+      /*
+       * 2 - Criar o treino dentro do plano
+       *
+       * Rota correta:
+       * POST /treinos/:id/treinos
+       */
+      const treinoResponse = await api.post(
+        `/treinos/${plano.id_plano}/treinos`,
+        {
+          nome: nomeTreino.trim(),
+          dia_semana: diaSemana
+        }
+      );
 
       const treinoBody = treinoResponse.data as ApiResponse<any>;
 
@@ -233,32 +273,53 @@
 
       const treino = treinoBody.data;
 
+      /*
+       * 3 - Adicionar exercícios ao treino
+       *
+       * Rota:
+       * POST /treinos/:id/exercicios
+       */
       for (const exercicio of exerciciosTreino) {
-        await api.post(`/treinos/${treino.id_treino}/exercicios`, {
-          id_exercicio: exercicio.id_exercicio,
-          series: exercicio.series,
-          repeticoes: exercicio.repeticoes,
-          carga: exercicio.carga,
-          descanso: exercicio.descanso,
-          ordem: exercicio.ordem,
-          observacao: exercicio.observacao
-        });
+        await api.post(
+          `/treinos/${treino.id_treino}/exercicios`,
+          {
+            id_exercicio: exercicio.id_exercicio,
+            series: exercicio.series,
+            repeticoes: exercicio.repeticoes,
+            carga: exercicio.carga,
+            descanso: exercicio.descanso,
+            ordem: exercicio.ordem,
+            observacao: exercicio.observacao
+          }
+        );
       }
 
       sucesso = 'Plano de treino criado com sucesso!';
 
+      /*
+       * Limpar formulário
+       */
       nomePlano = '';
       descricaoPlano = '';
       nomeTreino = '';
       exerciciosTreino = [];
       alunoSelecionado = '';
       diaSemana = 'segunda';
+
+      exercicioSelecionado = '';
+      series = 3;
+      repeticoes = 12;
+      carga = null;
+      descanso = 60;
+      observacao = '';
+
     } catch (e: any) {
       console.error('Erro ao criar plano:', e);
 
       error =
         e.response?.data?.message ||
         'Erro ao salvar o plano de treino.';
+
     } finally {
       salvando = false;
     }
@@ -399,7 +460,6 @@
 
       </div>
 
-
       <div class="lg:col-span-2">
 
         <Card class="shadow-lg border border-gray-200">
@@ -517,7 +577,6 @@
           </div>
 
         </Card>
-
 
         <Card class="mt-6 shadow-lg border border-gray-200">
 
