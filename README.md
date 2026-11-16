@@ -32,4 +32,4 @@ O CP2 FIT é uma plataforma web de gerenciamento de academias que integra alunos
 
 **Modelagem do Banco de Dados**
 
-![Diagrama de Banco de Dados](doc/diagramas/diagrama-CP2_fit.png)
+![Diagrama de Banco de Dados](doc/diagramas/diagrama_CP2_fit.png)
