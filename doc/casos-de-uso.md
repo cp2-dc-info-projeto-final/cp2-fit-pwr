@@ -16,10 +16,6 @@
 - **Professor:** profissional responsável por organizar aulas, gerenciar suas turmas e criar planos de treino para os alunos.
 - **Administrador:** responsável pelo gerenciamento geral do sistema, incluindo usuários, professores, modalidades, aulas e turmas.
 
-## Diagrama de Casos de Uso
-
-![Diagrama de Casos de Uso](diagramas/diagrama-casos-de-uso.png)
-
 ## Descrição dos Casos de Uso
 
 ### CDU 01 – Realizar cadastro e login no sistema
