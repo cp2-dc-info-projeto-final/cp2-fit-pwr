@@ -1,11 +1,11 @@
-# Nome do Meu Projeto
+# CP2 fit
 
 Projeto Final 2025 do Curso Técnico Integrado de Desenvolvimento de Sistemas - Colégio Pedro II - Campus Duque de Caxias
 
 **Integrantes:**
- - Fulana
- - Beltrano
- - Ciclano
+ - Ramon carlos
+ - Wallace cunha
+ - Paulo vitor
 
  ## Tecnologias
 
