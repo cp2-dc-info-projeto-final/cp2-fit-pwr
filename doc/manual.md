@@ -1,29 +1,184 @@
-# Manual do Usuário
+# Manual do Usuário – CP2 FIT
 
-Nullam vitae velit a eros dignissim bibendum id a enim. Vestibulum hendrerit nisl sed magna gravida, non elementum urna condimentum. Quisque porta tincidunt nunc. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Duis at varius mauris. Quisque molestie ante imperdiet elit blandit, ac volutpat sem efficitur. Donec nec sem tempus, ullamcorper nisl non, blandit tortor. Etiam suscipit rutrum laoreet. Donec facilisis eros ultrices, venenatis quam nec, feugiat ante. Donec ante eros, consequat nec nibh vitae, porta vehicula orci. Duis nec eros et lorem malesuada sodales. Praesent auctor accumsan ipsum, et volutpat ex porttitor eu. Vestibulum facilisis elementum elit, hendrerit mollis velit pretium in. Curabitur tristique vel augue a sodales. Sed malesuada lacinia porttitor.
+O CP2 FIT é uma plataforma web desenvolvida com o objetivo de facilitar o gerenciamento de uma academia, proporcionando um ambiente integrado para alunos, professores e administradores. Por meio do sistema, é possível realizar matrículas, consultar modalidades, participar de aulas, organizar turmas e acompanhar planos de treino.
 
-**Lista das Funcionalidades:**
+Este manual tem como finalidade orientar os usuários na utilização das principais funcionalidades do sistema, apresentando instruções para acessar a plataforma e utilizar seus recursos de acordo com o tipo de conta.
 
- - [Funcionalidade X](#Funcionalidade-X)
- - [Funcionalidade Y](#Funcionalidade-Y)
- - [Funcionalidade Z](#Funcionalidade-Z)
+## Lista das Funcionalidades
 
-## Funcionalidade X
+- [Cadastro e Login](#cadastro-e-login)
+- [Matrícula](#matrícula)
+- [Área do Aluno](#área-do-aluno)
+- [Aulas e Turmas](#aulas-e-turmas)
+- [Planos de Treino](#planos-de-treino)
+- [Área do Professor](#área-do-professor)
+- [Área do Administrador](#área-do-administrador)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus volutpat molestie justo non tincidunt. Praesent tristique, elit convallis eleifend congue, nisl ex lobortis lorem, ac gravida tellus lacus eu enim. Aliquam urna turpis, convallis id turpis et, iaculis consequat nunc. Proin elit orci, imperdiet nec tristique nec, tincidunt ut nibh. Donec dignissim urna ut erat imperdiet aliquam. Vestibulum augue leo, pellentesque malesuada egestas quis, molestie at lacus. Donec rhoncus finibus lorem, accumsan interdum sapien facilisis sit amet. Integer odio magna, sodales at varius at, dapibus vitae ante. Sed ac ullamcorper ex. Ut in metus ipsum. Duis vulputate porta mi, id venenatis massa ornare vel. Nunc ornare malesuada elit sed feugiat.
+## Cadastro e Login
 
-![Screenshot 01](screenshots/screenshot01.png)
+Para utilizar o CP2 FIT, o usuário deve acessar o site e realizar o cadastro ou entrar em uma conta já existente.
 
-Aliquam in convallis quam, egestas consectetur felis. Integer in dolor sit amet neque volutpat faucibus ut porttitor libero. Morbi faucibus non purus nec finibus. Pellentesque lacus nunc, ultricies quis enim at, vehicula semper nibh. Ut eget erat blandit, porta nibh sit amet, facilisis felis. Aliquam vitae consequat nisi, ut vestibulum sapien. Sed ornare quis leo quis cursus. Vestibulum ut quam odio. Donec sit amet risus augue. Curabitur venenatis a tortor ac placerat.
+**Cadastro:**
 
-## Funcionalidade Y
+1. Acesse a página inicial do CP2 FIT.
+2. Clique na opção de cadastro.
+3. Preencha os campos solicitados com suas informações pessoais.
+4. Confirme os dados e finalize o cadastro.
+5. Após o cadastro, será possível prosseguir para o processo de matrícula.
 
-In vestibulum euismod orci, vitae mollis neque luctus vel. Aliquam erat volutpat. Pellentesque nulla elit, iaculis posuere interdum a, imperdiet sollicitudin dui. Morbi consectetur cursus dictum. Etiam vel feugiat tortor, non tempor nibh. Nam eu massa libero. Donec id eleifend justo, tempus consectetur augue. Phasellus porttitor ex leo. Proin efficitur ante vel tortor tempus ornare. Cras molestie, velit non laoreet lobortis, nisl metus volutpat augue, id dictum libero ipsum a mi. Quisque eget tristique felis.
+**Login:**
 
-Donec auctor a orci a semper. Nunc consequat dui vel eros faucibus molestie. Praesent euismod purus nec justo iaculis varius. Integer vehicula ac metus at ultricies. Maecenas pulvinar neque sed est sollicitudin, vitae dignissim magna posuere. Sed consectetur, mi nec bibendum sodales, urna sem aliquam leo, mollis vulputate justo leo vel nunc. Sed lacinia ipsum lacus, ultrices iaculis tellus efficitur at. Proin consectetur orci ac egestas aliquam. Proin dignissim euismod turpis sollicitudin interdum. Mauris pellentesque, orci non accumsan lobortis, nunc felis hendrerit tortor, non rutrum risus nisl id erat.
+1. Acesse a página de login.
+2. Informe seu usuário e senha.
+3. Clique no botão de entrar.
+4. Após a autenticação, o sistema direcionará o usuário para a área correspondente ao seu perfil.
 
-## Funcionalidade Z
+O sistema possui diferentes níveis de acesso, permitindo que alunos, professores e administradores utilizem funcionalidades específicas.
 
-Sed consequat, diam in imperdiet fringilla, magna metus vehicula ipsum, eu tincidunt massa dolor eget lorem. Integer pellentesque in massa in eleifend. Phasellus a interdum enim. Nullam malesuada nulla eu mi vestibulum imperdiet. Maecenas diam dolor, commodo eget commodo at, congue in libero. Morbi non erat enim. Nunc faucibus lacus urna. Aliquam erat volutpat. Aliquam ex nunc, dictum vel libero sit amet, varius pulvinar risus. Aenean tempus magna at nulla elementum, vel feugiat turpis sodales. Vestibulum viverra congue nibh sed tempor. Morbi faucibus rhoncus dictum. Vestibulum rutrum, nisi id porttitor posuere, purus leo accumsan turpis, sit amet rutrum nulla turpis sit amet ex. Sed ultricies pharetra libero, sed tempor tellus hendrerit eget. Maecenas nibh sem, accumsan ullamcorper felis sed, pharetra semper dolor. Pellentesque ornare lorem eu condimentum tincidunt.
+## Matrícula
 
-Nam lacinia gravida velit et ultricies. Quisque blandit a ligula at tincidunt. Vestibulum id odio a lectus maximus tempor non in augue. Duis vulputate dui vitae lacus ornare, et eleifend erat cursus. Mauris viverra, massa vel eleifend tempus, nunc justo tempus quam, ac sollicitudin lorem arcu vitae magna. Aliquam eleifend diam neque, at sagittis eros scelerisque vitae. Sed convallis iaculis tempor. Pellentesque in varius velit. Cras ut risus at ligula tristique tincidunt ac a risus. Morbi egestas tincidunt nunc, molestie aliquam nisl imperdiet egestas. Morbi hendrerit augue ac accumsan posuere. Sed a sodales elit. Nullam pharetra rhoncus arcu, eget pharetra massa egestas ut. Sed accumsan auctor dictum. Duis leo enim, pulvinar ut enim a, tempor aliquam dui. Nunc aliquet quam justo, sed aliquet justo tincidunt sed.
+A matrícula permite que o aluno tenha acesso aos serviços oferecidos pela academia.
+
+1. Após realizar o cadastro, acesse a página de matrícula.
+2. Consulte o plano disponível.
+3. Verifique o valor e os benefícios oferecidos.
+4. Clique na opção para realizar a matrícula.
+5. Preencha os dados do cartão solicitados pelo sistema.
+6. Finalize o processo.
+
+O plano apresentado possui o valor de R$ 80,00 e oferece os seguintes benefícios:
+
+- Acesso ilimitado à academia.
+- Participação em aulas coletivas.
+- Acesso à área de cardio.
+- Utilização da academia em horário comercial.
+- Acompanhamento com personal trainer.
+
+Após a confirmação da matrícula, o aluno poderá acessar as funcionalidades destinadas aos usuários matriculados.
+
+## Área do Aluno
+
+A área do aluno reúne os principais recursos necessários para acompanhar suas atividades na academia.
+
+Por meio dessa área, o aluno pode consultar as modalidades disponíveis, visualizar aulas, realizar inscrições em turmas e acompanhar seus planos de treino.
+
+As funcionalidades disponíveis incluem:
+
+- Consulta das aulas oferecidas.
+- Visualização dos horários das turmas.
+- Inscrição em aulas disponíveis.
+- Consulta dos planos de treino.
+- Visualização dos exercícios prescritos pelos professores.
+
+## Aulas e Turmas
+
+O sistema permite que os alunos consultem as aulas oferecidas pela academia e realizem inscrições nas turmas disponíveis.
+
+**Para consultar e se inscrever em uma aula:**
+
+1. Acesse a área de aulas.
+2. Visualize as modalidades disponíveis.
+3. Consulte os horários e os professores responsáveis.
+4. Escolha a turma desejada.
+5. Clique na opção de inscrição.
+
+Após realizar a inscrição, o aluno poderá consultar sua situação na turma.
+
+O sistema também permite que o professor visualize os alunos inscritos em suas turmas e gerencie as inscrições.
+
+## Planos de Treino
+
+O CP2 FIT possui uma funcionalidade destinada ao acompanhamento dos treinos dos alunos.
+
+Os planos são elaborados pelos professores e organizados de acordo com os exercícios definidos para cada aluno.
+
+**Para consultar seu treino:**
+
+1. Acesse a área de planos de treino.
+2. Localize o plano disponibilizado pelo professor.
+3. Selecione o treino desejado.
+4. Consulte a lista de exercícios cadastrados.
+
+Cada treino permite que o aluno acompanhe os exercícios prescritos pelo professor, facilitando a organização e o acompanhamento das atividades físicas.
+
+## Área do Professor
+
+A área do professor oferece ferramentas para organizar e acompanhar as atividades dos alunos.
+
+Por meio dessa área, o professor pode:
+
+- Consultar suas turmas.
+- Visualizar os alunos matriculados em cada turma.
+- Criar e gerenciar aulas.
+- Consultar as modalidades disponíveis.
+- Criar planos de treino para os alunos.
+- Adicionar exercícios aos treinos.
+- Organizar as atividades físicas dos alunos.
+
+**Gerenciamento de turmas:**
+
+1. Acesse a área destinada às turmas.
+2. Visualize as turmas vinculadas ao seu perfil.
+3. Selecione uma turma para consultar os alunos inscritos.
+4. Caso necessário, utilize a opção de cancelar a matrícula de um aluno na turma.
+
+**Criação de aulas:**
+
+1. Acesse a área de gerenciamento de aulas.
+2. Clique na opção de criar aula.
+3. Selecione a modalidade.
+4. Informe o horário da aula.
+5. Confira as informações e finalize o cadastro.
+
+**Criação de planos de treino:**
+
+1. Acesse a área de gerenciamento de treinos.
+2. Selecione o aluno que receberá o plano.
+3. Crie o plano de treino.
+4. Cadastre os treinos e seus respectivos exercícios.
+5. Salve as informações para disponibilizá-las ao aluno.
+
+## Área do Administrador
+
+O administrador possui acesso às funcionalidades de gerenciamento geral da plataforma, sendo responsável por organizar os cadastros e controlar as informações da academia.
+
+Entre as principais funcionalidades estão:
+
+- Gerenciamento de usuários.
+- Cadastro e edição de professores.
+- Gerenciamento de modalidades.
+- Criação e gerenciamento de aulas.
+- Gerenciamento de turmas.
+- Controle das informações da academia.
+
+**Gerenciamento de usuários:**
+
+1. Acesse a área administrativa.
+2. Entre na seção de usuários.
+3. Consulte os usuários cadastrados.
+4. Utilize as opções disponíveis para cadastrar, editar ou excluir usuários.
+
+**Gerenciamento de modalidades:**
+
+1. Acesse a seção de modalidades.
+2. Consulte as modalidades existentes.
+3. Utilize a opção de cadastro para adicionar uma nova modalidade.
+4. Informe o nome da modalidade.
+5. Salve as informações.
+
+**Gerenciamento de aulas e turmas:**
+
+1. Acesse a área administrativa correspondente.
+2. Consulte as aulas e turmas cadastradas.
+3. Utilize as opções disponíveis para criar, editar ou excluir registros.
+4. Informe os dados solicitados e confirme as alterações.
+
+O administrador também pode gerenciar os professores responsáveis pelas atividades e acompanhar a organização geral da plataforma.
+
+---
+
+## Considerações Finais
+
+O CP2 FIT foi desenvolvido para tornar o gerenciamento de uma academia mais simples, organizado e eficiente. A plataforma reúne em um único ambiente as principais ferramentas necessárias para a administração, organização das aulas e acompanhamento dos alunos.
+
+Seguindo as instruções deste manual, os usuários poderão aproveitar os recursos disponíveis de acordo com suas permissões de acesso.
