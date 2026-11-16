@@ -104,243 +104,350 @@
         carregarTreinos();
     });
 </script>
+<div class="min-h-screen w-full bg-gray-900 px-4 py-8 text-gray-100 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl">
 
+        <!-- Cabeçalho -->
+        <div class="mb-8">
+            <div class="flex flex-wrap items-center justify-between gap-4">
 
-<div class="max-w-6xl mx-auto px-4 py-8">
+                <div>
+                    <div class="mb-2 flex items-center gap-2">
+                        <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+                            Área de treinamento
+                        </span>
+                    </div>
 
-    <div class="mb-8">
-
-        <Heading tag="h2" class="text-2xl font-bold text-gray-800">
-            Meu Treino
-        </Heading>
-
-        <p class="mt-2 text-gray-500">
-            Acompanhe sua ficha de treino
-        </p>
-
-    </div>
-
-
-    {#if loading}
-
-        <div class="flex justify-center py-12">
-
-            <div class="text-gray-500">
-                Carregando treino...
-            </div>
-
-        </div>
-
-
-    {:else if error}
-
-        <div class="my-8 rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-
-            <p class="text-red-600">
-                {error}
-            </p>
-
-            <Button
-                color="light"
-                class="mt-4"
-                onclick={carregarTreinos}
-            >
-                Tentar novamente
-            </Button>
-
-        </div>
-
-
-    {:else}
-
-        <!-- Dias da semana -->
-
-        <div class="mb-8 flex gap-2 overflow-x-auto pb-2">
-
-            {#each dias as dia}
-
-                <Button
-                    color={diaSelecionado === dia ? 'primary' : 'light'}
-                    class="min-w-[100px] capitalize"
-                    onclick={() => selecionarDia(dia)}
-                >
-                    {dia}
-                </Button>
-
-            {/each}
-
-        </div>
-
-
-        {#if treinoSelecionado}
-
-            <!-- Cabeçalho do treino -->
-
-            <div class="mb-6">
-
-                <div class="flex flex-wrap items-center gap-3">
-
-                    <Heading tag="h3" class="text-xl font-bold text-gray-800">
-                        {treinoSelecionado.nome}
+                    <Heading tag="h2" class="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                        Meu Treino
                     </Heading>
 
-                    <Badge color="blue">
-                        {treinoSelecionado.dia_semana}
-                    </Badge>
+                    <p class="mt-2 text-sm text-gray-400 md:text-base">
+                        Acompanhe sua ficha e evolua a cada treino.
+                    </p>
+                </div>
 
+                <div class="rounded-xl border border-gray-700 bg-gray-800 px-4 py-3">
+                    <p class="text-xs text-gray-400">
+                        Sua rotina
+                    </p>
+                    <p class="mt-1 text-sm font-semibold text-white">
+                        Plano de treinamento
+                    </p>
                 </div>
 
             </div>
+        </div>
 
 
-            <!-- Exercícios -->
+        {#if loading}
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="flex flex-col items-center justify-center py-20">
+                <div class="mb-4 h-9 w-9 animate-spin rounded-full border-4 border-gray-700 border-t-blue-500"></div>
 
-                {#each treinoSelecionado.exercicios as exercicio}
-
-                    <Card
-                        class="w-full overflow-hidden border border-gray-200 shadow-lg transition duration-200 hover:-translate-y-1 hover:shadow-xl"
-                    >
-
-                        <div class="flex flex-col gap-5">
-
-                            <!-- Nome -->
-
-                            <div>
-
-                                <h4 class="text-xl font-bold text-gray-800">
-                                    {exercicio.nome}
-                                </h4>
-
-                                <Badge color="gray" class="mt-2">
-                                    {exercicio.grupo_muscular}
-                                </Badge>
-
-                            </div>
+                <p class="text-sm text-gray-400">
+                    Carregando seus treinos...
+                </p>
+            </div>
 
 
-                            <!-- Séries e repetições -->
+        {:else if error}
 
-                            <div class="grid grid-cols-2 gap-3">
+            <div class="my-8 rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
+                <p class="text-sm text-red-400">
+                    {error}
+                </p>
 
-                                <div class="rounded-lg bg-gray-100 p-3 text-center">
-
-                                    <p class="text-xs text-gray-400">
-                                        Séries
-                                    </p>
-
-                                    <p class="text-lg font-bold text-gray-700">
-                                        {exercicio.series}
-                                    </p>
-
-                                </div>
-
-
-                                <div class="rounded-lg bg-gray-100 p-3 text-center">
-
-                                    <p class="text-xs text-gray-400">
-                                        Repetições
-                                    </p>
-
-                                    <p class="text-lg font-bold text-gray-700">
-                                        {exercicio.repeticoes}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- Carga -->
-
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-
-                                <span class="text-sm text-gray-500">
-                                    Carga
-                                </span>
-
-                                <span class="font-semibold text-gray-700">
-
-                                    {#if exercicio.carga !== null}
-
-                                        {exercicio.carga} kg
-
-                                    {:else}
-
-                                        Livre
-
-                                    {/if}
-
-                                </span>
-
-                            </div>
-
-
-                            <!-- Descanso -->
-
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-
-                                <span class="text-sm text-gray-500">
-                                    Descanso
-                                </span>
-
-                                <span class="font-semibold text-gray-700">
-                                    {formatarDescanso(exercicio.descanso)}
-                                </span>
-
-                            </div>
-
-
-                            <!-- Observação -->
-
-                            {#if exercicio.observacao}
-
-                                <div>
-
-                                    <p class="text-xs text-gray-400">
-                                        Observação
-                                    </p>
-
-                                    <p class="mt-1 text-sm text-gray-600">
-                                        {exercicio.observacao}
-                                    </p>
-
-                                </div>
-
-                            {/if}
-
-
-                            <!-- Botão -->
-
-                            <Button
-                                color="light"
-                                class="w-full"
-                            >
-                                Ver exercício
-                            </Button>
-
-                        </div>
-
-                    </Card>
-
-                {/each}
-
+                <Button
+                    color="light"
+                    class="mt-4"
+                    onclick={carregarTreinos}
+                >
+                    Tentar novamente
+                </Button>
             </div>
 
 
         {:else}
 
-            <div class="py-12 text-center">
+            <!-- Navegação semanal -->
+            <div class="mb-8">
 
-                <p class="text-gray-500">
-                    Nenhum treino cadastrado para este dia.
-                </p>
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-white">
+                        Dias da semana
+                    </h3>
+
+                    <span class="text-xs text-gray-500">
+                        Selecione seu treino
+                    </span>
+                </div>
+
+                <div class="p-4 flex gap-2 overflow-x-auto pb-3">
+                    {#each dias as dia}
+                        <Button
+                            color={diaSelecionado === dia ? 'blue' : 'dark'}
+                            class="min-w-[110px] shrink-0 capitalize"
+                            onclick={() => selecionarDia(dia)}
+                        >
+                            {dia}
+                        </Button>
+                    {/each}
+                </div>
 
             </div>
 
+
+            {#if treinoSelecionado}
+
+                <!-- Resumo do treino -->
+                <div class="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800 shadow-lg">
+
+                    <div class="border-b border-gray-700 p-5 sm:p-6">
+
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+
+                            <div>
+                                <div class="mb-3 flex items-center gap-2">
+                                    <Badge color="blue">
+                                        {treinoSelecionado.dia_semana}
+                                    </Badge>
+
+                                    <span class="text-xs text-gray-500">
+                                        Ficha de treinamento
+                                    </span>
+                                </div>
+
+                                <Heading tag="h3" class="text-2xl font-bold text-white">
+                                    {treinoSelecionado.nome}
+                                </Heading>
+
+                                <p class="mt-2 text-sm text-gray-400">
+                                    Seu planejamento de exercícios para este dia.
+                                </p>
+                            </div>
+
+                            <div class="rounded-xl border border-gray-700 bg-gray-900/70 px-5 py-4 text-center">
+                                <p class="text-3xl font-bold text-blue-400">
+                                    {treinoSelecionado.exercicios.length}
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Exercícios
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="grid grid-cols-2 divide-x divide-gray-700">
+
+                        <div class="p-4 text-center">
+                            <p class="text-xs text-gray-500">
+                                Modalidade
+                            </p>
+                            <p class="mt-1 text-sm font-semibold text-gray-200">
+                                Musculação
+                            </p>
+                        </div>
+
+                        <div class="p-4 text-center">
+                            <p class="text-xs text-gray-500">
+                                Status
+                            </p>
+                            <div class="mt-1 flex items-center justify-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                <span class="text-sm font-semibold text-gray-200">
+                                    Programado
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Título dos exercícios -->
+                <div class="mb-5 flex items-center justify-between">
+
+                    <div>
+                        <Heading tag="h3" class="text-xl font-bold text-white">
+                            Exercícios
+                        </Heading>
+
+                        <p class="mt-1 text-sm text-gray-400">
+                            Confira os detalhes da sua execução.
+                        </p>
+                    </div>
+
+                    <Badge color="gray">
+                        {treinoSelecionado.exercicios.length} no total
+                    </Badge>
+
+                </div>
+
+
+                <!-- Lista de exercícios -->
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+                    {#each treinoSelecionado.exercicios as exercicio, index}
+
+                        <Card class="group w-full overflow-hidden border border-gray-700 bg-gray-800 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/60 hover:shadow-xl p-5">
+
+                            <div class="flex flex-col gap-5">
+
+                                <!-- Identificação -->
+                                <div class="flex items-start justify-between gap-3">
+
+                                    <div class="min-w-0">
+
+                                        <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                            Exercício {index + 1}
+                                        </span>
+
+                                        <h4 class="text-lg font-bold text-white transition-colors group-hover:text-blue-400">
+                                            {exercicio.nome}
+                                        </h4>
+
+                                        <div class="mt-2">
+                                            <Badge color="gray">
+                                                {exercicio.grupo_muscular}
+                                            </Badge>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-700 bg-gray-900 text-blue-400">
+                                        <span class="text-sm font-bold">
+                                            {index + 1}
+                                        </span>
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Séries e repetições -->
+                                <div class="grid grid-cols-2 gap-3">
+
+                                    <div class="rounded-xl border border-gray-700 bg-gray-900/70 p-4">
+
+                                        <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Séries
+                                        </p>
+
+                                        <p class="mt-2 text-2xl font-bold text-white">
+                                            {exercicio.series}
+                                        </p>
+
+                                    </div>
+
+                                    <div class="rounded-xl border border-gray-700 bg-gray-900/70 p-4">
+
+                                        <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                                            Repetições
+                                        </p>
+
+                                        <p class="mt-2 text-2xl font-bold text-white">
+                                            {exercicio.repeticoes}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Informações adicionais -->
+                                <div class="space-y-3">
+
+                                    <div class="flex items-center justify-between border-b border-gray-700 pb-3">
+
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-gray-500">⚖</span>
+                                            <span class="text-sm text-gray-400">
+                                                Carga
+                                            </span>
+                                        </div>
+
+                                        <span class="text-sm font-semibold text-gray-200">
+                                            {#if exercicio.carga !== null}
+                                                {exercicio.carga} kg
+                                            {:else}
+                                                Livre
+                                            {/if}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex items-center justify-between border-b border-gray-700 pb-3">
+
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-gray-500">◷</span>
+                                            <span class="text-sm text-gray-400">
+                                                Descanso
+                                            </span>
+                                        </div>
+
+                                        <span class="text-sm font-semibold text-gray-200">
+                                            {formatarDescanso(exercicio.descanso)}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Observação -->
+                                {#if exercicio.observacao}
+
+                                    <div class="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+
+                                        <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                            Observação
+                                        </p>
+
+                                        <p class="text-sm leading-relaxed text-gray-300">
+                                            {exercicio.observacao}
+                                        </p>
+
+                                    </div>
+
+                                {/if}
+
+                            </div>
+
+                        </Card>
+
+                    {/each}
+
+                </div>
+
+
+            {:else}
+
+                <!-- Estado vazio -->
+                <div class="rounded-2xl border border-dashed border-gray-700 bg-gray-800/50 px-6 py-16 text-center">
+
+                    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-700 bg-gray-800">
+                        <span class="text-2xl text-gray-500">🏋️</span>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-white">
+                        Nenhum treino encontrado
+                    </h3>
+
+                    <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-400">
+                        Não existe nenhum treino cadastrado para este dia. Selecione outro dia da semana.
+                    </p>
+
+                </div>
+
+            {/if}
+
         {/if}
 
-    {/if}
-
+    </div>
 </div>

@@ -388,85 +388,176 @@
 
 {#if modo === 'lista'}
 
-  <div class="p-8 mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-bold">Turmas</h1>
+  <div class="mb-8 flex flex-col items-start justify-between gap-4 rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg sm:flex-row sm:items-center sm:p-8">
+    <div>
+      <div class="mb-2 flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+          Área administrativa
+        </span>
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight text-white">
+        Turmas
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-400">
+        Gerencie suas modalidades, professores e alunos.
+      </p>
+    </div>
 
     <button
-      class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+      class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-blue-500/20"
       on:click={abrirCriacao}
     >
-      + Criar
+      + Criar turma
     </button>
   </div>
 
   {#if erro}
-    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+    <div class="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400">
       {erro}
     </div>
   {/if}
 
   {#if mensagem}
-    <div class="mb-4 rounded-lg bg-green-100 p-4 text-green-700">
+    <div class="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-medium text-green-400">
       {mensagem}
     </div>
   {/if}
 
   {#if loading}
-    <p>Carregando...</p>
+    <div class="flex flex-col items-center justify-center rounded-2xl border border-gray-700 bg-gray-800 py-16">
+      <div class="mb-4 h-9 w-9 animate-spin rounded-full border-4 border-gray-700 border-t-blue-500"></div>
+      <p class="text-sm text-gray-400">Carregando turmas...</p>
+    </div>
+
   {:else if turmas.length === 0}
-    <Card>
-      <div class="p-6 text-center">
-        <h2 class="text-lg font-semibold">
+    <Card class="border border-gray-700 bg-gray-800 shadow-lg">
+      <div class="p-10 text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-700 bg-gray-900">
+          <span class="text-3xl">🏋️</span>
+        </div>
+
+        <h2 class="text-xl font-bold text-white">
           Nenhuma turma encontrada
         </h2>
 
-        <p class="mt-2 text-gray-500">
+        <p class="mt-2 text-sm text-gray-400">
           Você ainda não possui turmas cadastradas.
         </p>
       </div>
     </Card>
+
   {:else}
+
+    <div class="mb-4 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-white">
+          Suas turmas
+        </h2>
+        <p class="mt-1 text-sm text-gray-400">
+          Selecione uma turma para visualizar os alunos.
+        </p>
+      </div>
+
+      <span class="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-400">
+        {turmas.length} cadastradas
+      </span>
+    </div>
 
     <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 
       {#each turmas as turma}
 
-        <Card class="h-full transition hover:shadow-lg">
-          <div class="p-2">
+        <Card class="h-full overflow-hidden border border-gray-700 bg-gray-800 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/60 hover:shadow-xl">
+
+          <div class="p-5">
 
             <button
               class="w-full text-left"
               on:click={() => abrirAlunos(turma)}
             >
-              <h2 class="text-xl font-bold">
+
+              <div class="mb-4 flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+                  Modalidade
+                </span>
+
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-700 bg-gray-900 text-xl">
+                  🏋️
+                </div>
+              </div>
+
+              <h2 class="text-xl font-bold text-white transition-colors group-hover:text-blue-400">
                 {turma.nome_modalidade}
               </h2>
 
-              <p class="mt-3 text-gray-600">
-                Horário: {turma.horario}
+              <div class="mt-5 space-y-4">
+
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-700 bg-gray-900 text-lg">
+                    🕒
+                  </div>
+
+                  <div>
+                    <p class="text-xs text-gray-500">Horário</p>
+                    <p class="mt-1 text-sm font-semibold text-gray-200">
+                      {turma.horario}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-700 bg-gray-900 text-lg">
+                    👨‍🏫
+                  </div>
+
+                  <div>
+                    <p class="text-xs text-gray-500">Professor</p>
+                    <p class="mt-1 text-sm font-semibold text-gray-200">
+                      {turma.professor}
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="mt-5 flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+
+                <div>
+                  <p class="text-xs font-medium text-gray-400">
+                    Alunos matriculados
+                  </p>
+
+                  <p class="mt-1 text-2xl font-bold text-blue-400">
+                    {turma.quantidade_alunos}
+                  </p>
+                </div>
+
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-500/20 bg-gray-900 text-xl">
+                  👥
+                </div>
+
+              </div>
+
+              <p class="mt-4 text-center text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300">
+                Visualizar alunos →
               </p>
 
-              <p class="text-gray-600">
-                Professor: {turma.professor}
-              </p>
-
-              <p class="mt-3 font-medium">
-                Alunos matriculados:
-                {turma.quantidade_alunos}
-              </p>
             </button>
 
-            <div class="mt-5 flex gap-3 border-t pt-4">
+            <div class="mt-5 flex gap-3 border-t border-gray-700 pt-4">
 
               <button
-                class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                class="flex-1 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-400 transition-all hover:border-blue-500 hover:bg-blue-600 hover:text-white"
                 on:click={() => abrirEdicao(turma)}
               >
                 Editar
               </button>
 
               <button
-                class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                class="flex-1 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-all hover:border-red-500 hover:bg-red-600 hover:text-white"
                 on:click={() => excluirTurma(turma)}
               >
                 Excluir
@@ -485,48 +576,61 @@
 
 {:else if modo === 'alunos'}
 
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-7 flex flex-col items-start justify-between gap-4 rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg sm:flex-row sm:items-center">
 
     <div>
-      <h1 class="text-2xl font-bold">
+      <div class="mb-2 flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+          Gestão de alunos
+        </span>
+      </div>
+
+      <h1 class="text-2xl font-bold tracking-tight text-white">
         {turmaSelecionada?.nome_modalidade}
       </h1>
 
-      <p class="text-gray-600">
-        Horário: {turmaSelecionada?.horario}
+      <p class="mt-2 text-sm text-gray-400">
+        Horário: <span class="font-semibold text-gray-200">{turmaSelecionada?.horario}</span>
       </p>
     </div>
 
     <button
-      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      class="rounded-xl border border-gray-600 bg-gray-900 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
       on:click={voltarLista}
     >
-      Voltar
+      ← Voltar
     </button>
 
   </div>
 
   {#if erro}
-    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+    <div class="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400">
       {erro}
     </div>
   {/if}
 
   {#if mensagem}
-    <div class="mb-4 rounded-lg bg-green-100 p-4 text-green-700">
+    <div class="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-medium text-green-400">
       {mensagem}
     </div>
   {/if}
 
   {#if loading}
 
-    <p>Carregando...</p>
+    <div class="rounded-2xl border border-gray-700 bg-gray-800 p-10 text-center text-sm text-gray-400">
+      Carregando...
+    </div>
 
   {:else if alunos.length === 0}
 
-    <Card>
-      <div class="p-6 text-center">
-        <h2 class="text-lg font-semibold">
+    <Card class="border border-gray-700 bg-gray-800 shadow-lg">
+      <div class="p-10 text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-700 bg-gray-900">
+          <span class="text-2xl">👥</span>
+        </div>
+
+        <h2 class="text-lg font-bold text-white">
           Nenhum aluno matriculado
         </h2>
       </div>
@@ -534,15 +638,15 @@
 
   {:else}
 
-    <div class="overflow-x-auto">
+    <div class="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800 shadow-lg">
 
-      <table class="w-full text-left text-sm text-gray-500">
+      <table class="w-full text-left text-sm text-gray-400">
 
-        <thead class="bg-gray-100 text-xs uppercase text-gray-700">
+        <thead class="border-b border-gray-700 bg-gray-900/70 text-xs uppercase tracking-wider text-gray-400">
           <tr>
-            <th class="px-6 py-3">Aluno</th>
-            <th class="px-6 py-3">E-mail</th>
-            <th class="px-6 py-3 text-right">Ação</th>
+            <th class="px-6 py-4 font-semibold">Aluno</th>
+            <th class="px-6 py-4 font-semibold">E-mail</th>
+            <th class="px-6 py-4 text-right font-semibold">Ação</th>
           </tr>
         </thead>
 
@@ -550,20 +654,20 @@
 
           {#each alunos as aluno}
 
-            <tr class="border-b bg-white">
+            <tr class="border-b border-gray-700/70 transition-colors hover:bg-gray-700/30">
 
-              <td class="px-6 py-4 font-medium text-gray-900">
+              <td class="px-6 py-5 font-semibold text-gray-100">
                 {aluno.login}
               </td>
 
-              <td class="px-6 py-4">
+              <td class="px-6 py-5 text-gray-400">
                 {aluno.email}
               </td>
 
-              <td class="px-6 py-4 text-right">
+              <td class="px-6 py-5 text-right">
 
                 <button
-                  class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                  class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition-all hover:border-red-500 hover:bg-red-600 hover:text-white"
                   on:click={() => cancelarMatricula(aluno)}
                 >
                   Cancelar
@@ -585,39 +689,52 @@
 
 {:else if modo === 'criar'}
 
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-7 flex flex-col items-start justify-between gap-4 rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg sm:flex-row sm:items-center">
 
-    <h1 class="text-2xl font-bold">
-      Criar Turma
-    </h1>
+    <div>
+      <div class="mb-2 flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+          Área administrativa
+        </span>
+      </div>
+
+      <h1 class="text-2xl font-bold tracking-tight text-white">
+        Criar Turma
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-400">
+        Cadastre uma nova turma na academia.
+      </p>
+    </div>
 
     <button
-      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      class="rounded-xl border border-gray-600 bg-gray-900 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
       on:click={voltarLista}
     >
-      Voltar
+      ← Voltar
     </button>
 
   </div>
 
   {#if erro}
-    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+    <div class="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400">
       {erro}
     </div>
   {/if}
 
-  <Card>
+  <Card class="overflow-hidden border border-gray-700 bg-gray-800 shadow-lg">
 
     <form
       on:submit|preventDefault={criarTurma}
-      class="space-y-5"
+      class="space-y-6 p-6 sm:p-8"
     >
 
       <div>
 
         <label
           for="modalidade"
-          class="mb-2 block text-sm font-medium text-gray-900"
+          class="mb-2 block text-sm font-semibold text-gray-200"
         >
           Modalidade
         </label>
@@ -625,7 +742,7 @@
         <select
           id="modalidade"
           bind:value={idModalidade}
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition placeholder:text-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
         >
 
           <option value="">
@@ -650,7 +767,7 @@
 
           <label
             for="professor"
-            class="mb-2 block text-sm font-medium text-gray-900"
+            class="mb-2 block text-sm font-semibold text-gray-200"
           >
             Professor
           </label>
@@ -658,7 +775,7 @@
           <select
             id="professor"
             bind:value={idProfessor}
-            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+            class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
           >
 
             <option value="">
@@ -683,7 +800,7 @@
 
         <label
           for="horario"
-          class="mb-2 block text-sm font-medium text-gray-900"
+          class="mb-2 block text-sm font-semibold text-gray-200"
         >
           Horário
         </label>
@@ -692,18 +809,22 @@
           id="horario"
           type="time"
           bind:value={horario}
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
         />
 
       </div>
 
-      <button
-        type="submit"
-        disabled={criando}
-        class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        {criando ? 'Criando...' : 'Criar Turma'}
-      </button>
+      <div class="border-t border-gray-700 pt-5">
+
+        <button
+          type="submit"
+          disabled={criando}
+          class="w-full rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {criando ? 'Criando...' : 'Criar Turma'}
+        </button>
+
+      </div>
 
     </form>
 
@@ -711,39 +832,52 @@
 
 {:else if modo === 'editar'}
 
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-7 flex flex-col items-start justify-between gap-4 rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg sm:flex-row sm:items-center">
 
-    <h1 class="text-2xl font-bold">
-      Editar Turma
-    </h1>
+    <div>
+      <div class="mb-2 flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+          Área administrativa
+        </span>
+      </div>
+
+      <h1 class="text-2xl font-bold tracking-tight text-white">
+        Editar Turma
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-400">
+        Atualize as informações da turma.
+      </p>
+    </div>
 
     <button
-      class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+      class="rounded-xl border border-gray-600 bg-gray-900 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
       on:click={voltarLista}
     >
-      Voltar
+      ← Voltar
     </button>
 
   </div>
 
   {#if erro}
-    <div class="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+    <div class="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400">
       {erro}
     </div>
   {/if}
 
-  <Card>
+  <Card class="overflow-hidden border border-gray-700 bg-gray-800 shadow-lg">
 
     <form
       on:submit|preventDefault={atualizarTurma}
-      class="space-y-5"
+      class="space-y-6 p-6 sm:p-8"
     >
 
       <div>
 
         <label
           for="modalidade-editar"
-          class="mb-2 block text-sm font-medium text-gray-900"
+          class="mb-2 block text-sm font-semibold text-gray-200"
         >
           Modalidade
         </label>
@@ -751,7 +885,7 @@
         <select
           id="modalidade-editar"
           bind:value={idModalidade}
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
         >
 
           <option value="">
@@ -776,7 +910,7 @@
 
           <label
             for="professor-editar"
-            class="mb-2 block text-sm font-medium text-gray-900"
+            class="mb-2 block text-sm font-semibold text-gray-200"
           >
             Professor
           </label>
@@ -784,7 +918,7 @@
           <select
             id="professor-editar"
             bind:value={idProfessor}
-            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+            class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
           >
 
             <option value="">
@@ -809,7 +943,7 @@
 
         <label
           for="horario-editar"
-          class="mb-2 block text-sm font-medium text-gray-900"
+          class="mb-2 block text-sm font-semibold text-gray-200"
         >
           Horário
         </label>
@@ -818,18 +952,22 @@
           id="horario-editar"
           type="time"
           bind:value={horario}
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm"
+          class="block w-full rounded-xl border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-gray-200 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
         />
 
       </div>
 
-      <button
-        type="submit"
-        disabled={criando}
-        class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        {criando ? 'Salvando...' : 'Salvar alterações'}
-      </button>
+      <div class="border-t border-gray-700 pt-5">
+
+        <button
+          type="submit"
+          disabled={criando}
+          class="w-full rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {criando ? 'Salvando...' : 'Salvar alterações'}
+        </button>
+
+      </div>
 
     </form>
 

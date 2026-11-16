@@ -1,7 +1,6 @@
 <script lang="ts">
     import { Heading, P, Button } from 'flowbite-svelte';
     import { goto } from '$app/navigation';
-    import Menu from '../components/Menu.svelte';
     import { onMount, onDestroy } from 'svelte';
     import { getCurrentUser } from '$lib/auth';
 
@@ -56,12 +55,9 @@
 
 <!-- COR DE FUNDO  -->
 <div class="min-h-screen w-full bg-gray-900 text-gray-100 transition-colors">
-    <Menu />
-
     <!-- HERO -->
     <section class="relative pt-20">
         <div class="mx-auto max-w-7xl px-4">
-
             <!-- CARROSSEL -->
             <div class="relative h-[500px] overflow-hidden rounded-3xl shadow-2xl md:h-[600px]">
 
@@ -208,24 +204,29 @@
             </div>
 
         </div>
-
     </section>
+</div>
+<!-- CTA FINAL -->
+<section class="px-5 py-20 text-center md:py-24">
 
-    <!-- CTA FINAL -->
-    <section class="px-6 py-20 text-center">
+    <div class="mx-auto max-w-3xl">
+
+        <p class="mb-3 text-sm font-bold uppercase tracking-widest text-blue-400">
+            Faça parte da comunidade
+        </p>
 
         <Heading
             tag="h2"
-            class="mb-4 text-3xl font-extrabold text-white"
+            class="mb-6 text-3xl font-extrabold text-white md:text-4xl"
         >
             Pronto para fazer parte?
         </Heading>
 
-        <P class="mx-auto mb-8 max-w-2xl text-gray-300">
+        <P class="mx-auto max-w-2xl text-center text-base leading-relaxed text-gray-300 md:text-lg">
             Entre para o CP2FIT e descubra novas formas de praticar
             esportes dentro do CP2.
         </P>
 
+    </div>
 
-    </section>
-</div>
+</section>

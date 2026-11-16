@@ -2,6 +2,6 @@
   import ExerciciosFormulario from '../../../components/ExerciciosFormulario.svelte';
 </script>
 
-<div class="mt-60"> 
+<div class="mb-8"> 
   <ExerciciosFormulario />
 </div>

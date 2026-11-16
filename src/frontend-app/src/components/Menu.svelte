@@ -72,12 +72,11 @@
   }
 </script>
 
-<div class="relative px-8">
-  <Navbar class="fixed start-0 top-0 z-20 w-full bg-gray-800 px-2 py-2.5 sm:px-4">
-    <NavBrand href="/">
+<Navbar class="sticky top-0 z-50 w-full border-b border-gray-700 bg-gray-800 px-4 py-3 shadow-lg sm:px-6">  
+<NavBrand href="/">
       <img src="/images/IconePedroII.png" class="me-3 h-6 sm:h-9" alt="Logo aleatória" />
       <!-- ALTERADO: apenas o texto abaixo -->
-      <Heading class="self-center text-xl font-semibold whitespace-nowrap text-primary-500 dark:text-primary-400">cp2fit</Heading>
+      <Heading class="self-center text-xl font-semibold whitespace-nowrap text-primary-500 dark:text-primary-400">CP2FIT</Heading>
     </NavBrand>
     <NavHamburger />
     <NavUl>
@@ -94,7 +93,7 @@
         {/if}
         {#if user.role === 'admin'}
           <NavLi href="/users" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Usuários</NavLi>
-          <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Gerenciar Aulas</NavLi>
+          <NavLi href="/turmas" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Gerenciar Turmas</NavLi>
           <NavLi href="/modalidades" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Modalidades</NavLi>
           <NavLi href="/exercicios" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Exercicios</NavLi>
         {/if}
@@ -132,5 +131,4 @@
         <NavLi href="/login" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Login</NavLi>
       {/if}
     </NavUl>
-  </Navbar>
-</div>
+</Navbar>

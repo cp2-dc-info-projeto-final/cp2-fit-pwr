@@ -7,6 +7,6 @@
   // Captura o parâmetro 'id' da URL
   const { id } = get(page).params;
 </script>
-<div class="mt-60">
+<div class="mb-8">
   <ExerciciosFormulario id={Number(id)} />
 </div>

@@ -1,12 +1,13 @@
 <script lang="ts">
-	import '../app.css';
-	import Menu from '../components/Menu.svelte';
-	let { children } = $props();
+    import '../app.css';
+    import Menu from '../components/Menu.svelte';
+
+    let { children } = $props();
 </script>
 
-<main class="">
-  <Menu />
-  <div class="">
-    {@render children()}
-  </div>
-</main>
+<div class="min-h-screen w-full bg-gray-900 text-gray-100">
+    <Menu />
+    <main class="w-full">
+        {@render children()}
+    </main>
+</div>

@@ -1,7 +1,7 @@
+
 <script lang="ts">
   import { Heading } from 'flowbite-svelte';
   import ModalidadesTable from '../../components/ModalidadesTable.svelte';
-  import { UserAddOutline  } from 'flowbite-svelte-icons';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { getCurrentUser } from '$lib/auth';
@@ -10,11 +10,12 @@
   let canView = false;
 
   /**
-   * se não existir usuário redireciona para a página de login
-   * se não for admin redireciona para a página inicial
+   * Se não existir usuário, redireciona para login.
+   * Se não for admin, redireciona para a página inicial.
    */
   onMount(async () => {
     const user = await getCurrentUser();
+
     if (!user) {
       await goto('/login');
       return;
@@ -28,16 +29,68 @@
   });
 </script>
 
-{#if checkingAccess}
-  <div class="text-center p-8 pt-32 text-gray-500">Verificando acesso...</div>
-{:else if canView}
-  <div class="text-center p-8 pt-32">
-    <div class="flex items-center justify-between max-w-3xl mx-auto mb-6">
-      <Heading tag="h2" class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">Modalidades</Heading>
-      <button class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold shadow transition" on:click={() => goto('/modalidades/new')}>
-        Adicionar
-      </button>
-    </div>
-    <ModalidadesTable />
+<div class="min-h-screen bg-gray-900 px-4 py-8 text-gray-100 sm:px-6 lg:px-8">
+
+  <div class="mx-auto max-w-6xl">
+
+    {#if checkingAccess}
+
+      <div class="flex min-h-[350px] flex-col items-center justify-center rounded-2xl border border-gray-700 bg-gray-800">
+        <div class="mb-5 h-11 w-11 animate-spin rounded-full border-4 border-gray-700 border-t-blue-500"></div>
+        <p class="text-sm font-semibold text-gray-200">Verificando acesso</p>
+        <p class="mt-2 text-xs text-gray-500">Validando suas permissões...</p>
+      </div>
+
+    {:else if canView}
+
+      <!-- CABEÇALHO -->
+      <div class="mb-8">
+
+        <div class="flex flex-wrap items-center justify-between gap-4">
+
+          <div>
+            <div class="mb-2 flex items-center gap-2">
+              <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+
+              <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+                Administração
+              </span>
+            </div>
+
+            <Heading tag="h2" class="text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Modalidades
+            </Heading>
+
+            <p class="mt-2 text-sm text-gray-400 md:text-base">
+              Gerencie as modalidades disponíveis na academia.
+            </p>
+          </div>
+
+          <!-- BOTÃO ADICIONAR -->
+          <button
+            class="flex items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/30 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-500 hover:shadow-blue-900/40"
+            on:click={() => goto('/modalidades/new')}
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/>
+            </svg>
+
+            Adicionar modalidade
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- CONTEÚDO -->
+      <div class="space-y-6">
+
+        <ModalidadesTable />
+
+      </div>
+
+    {/if}
+
   </div>
-{/if}
+
+</div>

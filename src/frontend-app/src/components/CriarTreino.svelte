@@ -328,393 +328,621 @@
   onMount(carregarDados);
 </script>
 
-<div class="max-w-6xl mx-auto px-4 py-8">
 
-  <div class="mb-8">
-    <Heading tag="h2" class="text-2xl font-bold text-gray-800">
-      Criar Plano de Treino
-    </Heading>
+<div class="min-h-screen w-full bg-gray-900 px-4 py-8 text-gray-100 sm:px-6 lg:px-8">
 
-    <p class="mt-2 text-gray-500">
-      Monte um treino personalizado para seus alunos.
-    </p>
-  </div>
+    <div class="mx-auto max-w-6xl">
 
-  {#if loading}
+        <!-- Cabeçalho -->
+        <div class="mb-8">
 
-    <div class="flex justify-center py-12">
-      <p class="text-gray-500">
-        Carregando dados...
-      </p>
-    </div>
+            <div class="mb-2 flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-blue-500"></div>
 
-  {:else}
-
-    {#if error}
-      <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-        {error}
-      </div>
-    {/if}
-
-    {#if sucesso}
-      <div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-green-600">
-        {sucesso}
-      </div>
-    {/if}
-
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-      <div class="lg:col-span-1">
-
-        <Card class="shadow-lg border border-gray-200">
-
-          <Heading tag="h3" class="text-lg font-bold">
-            Dados do plano
-          </Heading>
-
-          <div class="mt-5 flex flex-col gap-5">
-
-            <div>
-              <Label for="aluno">
-                Aluno
-              </Label>
-
-              <Select
-                id="aluno"
-                bind:value={alunoSelecionado}
-                class="mt-1"
-              >
-                <option value="" disabled selected hidden>
-                  Selecione um aluno
-                </option>
-
-                {#each alunos as aluno}
-                  <option value={aluno.id}>
-                    {aluno.login}
-                  </option>
-                {/each}
-              </Select>
+                <span class="text-xs font-semibold uppercase tracking-widest text-blue-400">
+                    Gestão de treinamento
+                </span>
             </div>
 
-            <div>
-              <Label for="nomePlano">
-                Nome do plano
-              </Label>
-
-              <Input
-                id="nomePlano"
-                bind:value={nomePlano}
-                placeholder="Ex: Hipertrofia"
-                class="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label for="descricao">
-                Descrição
-              </Label>
-
-              <Textarea
-                id="descricao"
-                bind:value={descricaoPlano}
-                placeholder="Descrição do plano..."
-                class="mt-1"
-                rows={4}
-              />
-            </div>
-
-            <div>
-              <Label for="nomeTreino">
-                Nome do treino
-              </Label>
-
-              <Input
-                id="nomeTreino"
-                bind:value={nomeTreino}
-                placeholder="Ex: Treino A - Peito e Tríceps"
-                class="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label for="dia">
-                Dia da semana
-              </Label>
-
-              <Select
-                id="dia"
-                bind:value={diaSemana}
-                class="mt-1"
-              >
-                {#each diasSemana as dia}
-                  <option value={dia.value}>
-                    {dia.name}
-                  </option>
-                {/each}
-              </Select>
-            </div>
-
-          </div>
-
-        </Card>
-
-      </div>
-
-      <div class="lg:col-span-2">
-
-        <Card class="shadow-lg border border-gray-200">
-
-          <Heading tag="h3" class="text-lg font-bold">
-            Adicionar exercício
-          </Heading>
-
-          <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-
-            <div class="md:col-span-2">
-              <Label for="exercicio">
-                Exercício
-              </Label>
-
-              <Select
-                id="exercicio"
-                bind:value={exercicioSelecionado}
-                class="mt-1"
-              >
-                <option value="" disabled selected hidden>
-                  Selecione um exercício
-                </option>
-
-                {#each exercicios as exercicio}
-                  <option value={exercicio.id_exercicio}>
-                    {exercicio.nome} — {exercicio.grupo_muscular}
-                  </option>
-                {/each}
-              </Select>
-            </div>
-
-            <div>
-              <Label for="series">
-                Séries
-              </Label>
-
-              <Input
-                id="series"
-                type="number"
-                min="1"
-                bind:value={series}
-                class="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label for="repeticoes">
-                Repetições
-              </Label>
-
-              <Input
-                id="repeticoes"
-                type="number"
-                min="1"
-                bind:value={repeticoes}
-                class="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label for="carga">
-                Carga (kg)
-              </Label>
-
-              <Input
-                id="carga"
-                type="number"
-                min="0"
-                step="0.5"
-                bind:value={carga}
-                placeholder="Ex: 20"
-                class="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label for="descanso">
-                Descanso (segundos)
-              </Label>
-
-              <Input
-                id="descanso"
-                type="number"
-                min="0"
-                bind:value={descanso}
-                class="mt-1"
-              />
-            </div>
-
-            <div class="md:col-span-2">
-              <Label for="observacao">
-                Observação
-              </Label>
-
-              <Textarea
-                id="observacao"
-                bind:value={observacao}
-                placeholder="Ex: Executar lentamente..."
-                rows={3}
-                class="mt-1"
-              />
-            </div>
-
-          </div>
-
-          <div class="mt-5">
-            <Button
-              color="light"
-              class="w-full"
-              onclick={adicionarExercicio}
-            >
-              + Adicionar exercício
-            </Button>
-          </div>
-
-        </Card>
-
-        <Card class="mt-6 shadow-lg border border-gray-200">
-
-          <div class="flex items-center justify-between">
-
-            <Heading tag="h3" class="text-lg font-bold">
-              Exercícios do treino
+            <Heading tag="h2" class="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                Criar Plano de Treino
             </Heading>
 
-            <Badge color="blue">
-              {exerciciosTreino.length}
-            </Badge>
+            <p class="mt-2 text-sm text-gray-400 md:text-base">
+                Monte uma ficha personalizada e organize os treinos dos seus alunos.
+            </p>
 
-          </div>
+        </div>
 
-          {#if exerciciosTreino.length === 0}
 
-            <div class="py-8 text-center text-gray-500">
-              Nenhum exercício adicionado.
+        {#if loading}
+
+            <div class="flex flex-col items-center justify-center py-20">
+
+                <div class="mb-4 h-9 w-9 animate-spin rounded-full border-4 border-gray-700 border-t-blue-500"></div>
+
+                <p class="text-sm text-gray-400">
+                    Carregando dados...
+                </p>
+
             </div>
 
-          {:else}
+        {:else}
 
-            <div class="mt-5 flex flex-col gap-3">
+            <!-- Mensagens -->
+            {#if error}
 
-              {#each exerciciosTreino as exercicio, index}
+                <div class="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-red-400">!</span>
 
-                <div
-                  class="rounded-lg border border-gray-200 bg-gray-50 p-4"
-                >
-
-                  <div class="flex items-start justify-between gap-4">
-
-                    <div>
-
-                      <div class="flex items-center gap-2">
-                        <span class="font-bold text-gray-800">
-                          {index + 1}. {exercicio.nome}
-                        </span>
-
-                        <Badge color="gray">
-                          {exercicio.grupo_muscular}
-                        </Badge>
-                      </div>
-
-                      <div class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-
-                        <div>
-                          <span class="text-gray-400">
-                            Séries
-                          </span>
-
-                          <p class="font-semibold">
-                            {exercicio.series}
-                          </p>
-                        </div>
-
-                        <div>
-                          <span class="text-gray-400">
-                            Repetições
-                          </span>
-
-                          <p class="font-semibold">
-                            {exercicio.repeticoes}
-                          </p>
-                        </div>
-
-                        <div>
-                          <span class="text-gray-400">
-                            Carga
-                          </span>
-
-                          <p class="font-semibold">
-                            {exercicio.carga ?? '-'} kg
-                          </p>
-                        </div>
-
-                        <div>
-                          <span class="text-gray-400">
-                            Descanso
-                          </span>
-
-                          <p class="font-semibold">
-                            {exercicio.descanso}s
-                          </p>
-                        </div>
-
-                      </div>
-
-                      {#if exercicio.observacao}
-                        <p class="mt-3 text-sm text-gray-500">
-                          {exercicio.observacao}
+                        <p class="text-sm text-red-400">
+                            {error}
                         </p>
-                      {/if}
-
                     </div>
+                </div>
 
-                    <button
-                      type="button"
-                      class="text-sm text-red-500 hover:text-red-700"
-                      onclick={() => removerExercicio(index)}
-                    >
-                      Remover
-                    </button>
+            {/if}
 
-                  </div>
+
+            {#if sucesso}
+
+                <div class="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="text-green-400">✓</span>
+
+                        <p class="text-sm text-green-400">
+                            {sucesso}
+                        </p>
+                    </div>
+                </div>
+
+            {/if}
+
+
+            <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+
+
+                <!-- COLUNA ESQUERDA -->
+                <div class="lg:col-span-1">
+
+                    <Card class="w-full border border-gray-700 bg-gray-800 p-5 shadow-lg">
+
+                        <!-- Título -->
+                        <div class="mb-6">
+
+                            <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
+                                <span class="text-lg text-blue-400">▤</span>
+                            </div>
+
+                            <Heading tag="h3" class="text-lg font-bold text-white">
+                                Dados do plano
+                            </Heading>
+
+                            <p class="mt-1 text-sm text-gray-400">
+                                Informações gerais do treinamento.
+                            </p>
+
+                        </div>
+
+
+                        <div class="flex flex-col gap-5">
+
+                            <!-- Aluno -->
+                            <div>
+
+                                <Label for="aluno" class="text-sm font-medium text-gray-300">
+                                    Aluno
+                                </Label>
+
+                                <Select
+                                    id="aluno"
+                                    bind:value={alunoSelecionado}
+                                    class="mt-2"
+                                >
+                                    <option value="" disabled selected hidden>
+                                        Selecione um aluno
+                                    </option>
+
+                                    {#each alunos as aluno}
+                                        <option value={aluno.id}>
+                                            {aluno.login}
+                                        </option>
+                                    {/each}
+                                </Select>
+
+                            </div>
+
+
+                            <!-- Nome do plano -->
+                            <div>
+
+                                <Label for="nomePlano" class="text-sm font-medium text-gray-300">
+                                    Nome do plano
+                                </Label>
+
+                                <Input
+                                    id="nomePlano"
+                                    bind:value={nomePlano}
+                                    placeholder="Ex: Hipertrofia"
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+
+                            <!-- Descrição -->
+                            <div>
+
+                                <Label for="descricao" class="text-sm font-medium text-gray-300">
+                                    Descrição
+                                </Label>
+
+                                <Textarea
+                                    id="descricao"
+                                    bind:value={descricaoPlano}
+                                    placeholder="Descreva os objetivos deste plano..."
+                                    class="mt-2"
+                                    rows={4}
+                                />
+
+                            </div>
+
+
+                            <div class="border-t border-gray-700"></div>
+
+
+                            <!-- Configuração da ficha -->
+                            <div>
+
+                                <div class="mb-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                        Configuração da ficha
+                                    </p>
+                                </div>
+
+                                <div class="flex flex-col gap-5">
+
+                                    <div>
+
+                                        <Label for="nomeTreino" class="text-sm font-medium text-gray-300">
+                                            Nome do treino
+                                        </Label>
+
+                                        <Input
+                                            id="nomeTreino"
+                                            bind:value={nomeTreino}
+                                            placeholder="Ex: Treino A - Peito e Tríceps"
+                                            class="mt-2"
+                                        />
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <Label for="dia" class="text-sm font-medium text-gray-300">
+                                            Dia da semana
+                                        </Label>
+
+                                        <Select
+                                            id="dia"
+                                            bind:value={diaSemana}
+                                            class="mt-2"
+                                        >
+                                            {#each diasSemana as dia}
+                                                <option value={dia.value}>
+                                                    {dia.name}
+                                                </option>
+                                            {/each}
+                                        </Select>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </Card>
 
                 </div>
 
-              {/each}
+
+                <!-- COLUNA DIREITA -->
+                <div class="flex flex-col gap-6 lg:col-span-2">
+
+                    <!-- ADICIONAR EXERCÍCIO -->
+                    <Card class="w-full border border-gray-700 bg-gray-800 p-5 shadow-lg">
+
+                        <div class="mb-6">
+
+                            <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
+                                <span class="text-xl font-semibold text-blue-400">+</span>
+                            </div>
+
+                            <Heading tag="h3" class="text-lg font-bold text-white">
+                                Adicionar exercício
+                            </Heading>
+
+                            <p class="mt-1 text-sm text-gray-400">
+                                Configure os parâmetros de execução do exercício.
+                            </p>
+
+                        </div>
+
+
+                        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                            <!-- Exercício -->
+                            <div class="md:col-span-2">
+
+                                <Label for="exercicio" class="text-sm font-medium text-gray-300">
+                                    Exercício
+                                </Label>
+
+                                <Select
+                                    id="exercicio"
+                                    bind:value={exercicioSelecionado}
+                                    class="mt-2"
+                                >
+                                    <option value="" disabled selected hidden>
+                                        Selecione um exercício
+                                    </option>
+
+                                    {#each exercicios as exercicio}
+                                        <option value={exercicio.id_exercicio}>
+                                            {exercicio.nome} — {exercicio.grupo_muscular}
+                                        </option>
+                                    {/each}
+                                </Select>
+
+                            </div>
+
+
+                            <!-- Séries -->
+                            <div>
+
+                                <Label for="series" class="text-sm font-medium text-gray-300">
+                                    Séries
+                                </Label>
+
+                                <Input
+                                    id="series"
+                                    type="number"
+                                    min="1"
+                                    bind:value={series}
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+
+                            <!-- Repetições -->
+                            <div>
+
+                                <Label for="repeticoes" class="text-sm font-medium text-gray-300">
+                                    Repetições
+                                </Label>
+
+                                <Input
+                                    id="repeticoes"
+                                    type="number"
+                                    min="1"
+                                    bind:value={repeticoes}
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+
+                            <!-- Carga -->
+                            <div>
+
+                                <Label for="carga" class="text-sm font-medium text-gray-300">
+                                    Carga (kg)
+                                </Label>
+
+                                <Input
+                                    id="carga"
+                                    type="number"
+                                    min="0"
+                                    step="0.5"
+                                    bind:value={carga}
+                                    placeholder="Ex: 20"
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+
+                            <!-- Descanso -->
+                            <div>
+
+                                <Label for="descanso" class="text-sm font-medium text-gray-300">
+                                    Descanso (segundos)
+                                </Label>
+
+                                <Input
+                                    id="descanso"
+                                    type="number"
+                                    min="0"
+                                    bind:value={descanso}
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+
+                            <!-- Observação -->
+                            <div class="md:col-span-2">
+
+                                <Label for="observacao" class="text-sm font-medium text-gray-300">
+                                    Observações
+                                </Label>
+
+                                <Textarea
+                                    id="observacao"
+                                    bind:value={observacao}
+                                    placeholder="Ex: Executar lentamente, manter postura..."
+                                    rows={3}
+                                    class="mt-2"
+                                />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Botão adicionar -->
+                        <div class="mt-6 border-t border-gray-700 pt-5">
+
+                            <Button
+                                color="blue"
+                                class="w-full"
+                                onclick={adicionarExercicio}
+                            >
+                                + Adicionar exercício ao treino
+                            </Button>
+
+                        </div>
+
+                    </Card>
+
+
+
+                    <!-- LISTA DE EXERCÍCIOS -->
+                    <Card class="w-full border border-gray-700 bg-gray-800 p-5 shadow-lg">
+
+
+                        <!-- Cabeçalho -->
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+
+                            <div>
+
+                                <Heading tag="h3" class="text-lg font-bold text-white">
+                                    Exercícios do treino
+                                </Heading>
+
+                                <p class="mt-1 text-sm text-gray-400">
+                                    Revise os exercícios antes de salvar.
+                                </p>
+
+                            </div>
+
+                            <div class="rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-center">
+
+                                <p class="text-xl font-bold text-blue-400">
+                                    {exerciciosTreino.length}
+                                </p>
+
+                                <p class="text-xs text-gray-400">
+                                    Adicionados
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {#if exerciciosTreino.length === 0}
+
+                            <!-- Estado vazio -->
+                            <div class="mt-6 rounded-xl border border-dashed border-gray-700 bg-gray-900/50 px-5 py-12 text-center">
+
+                                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-gray-700 bg-gray-800">
+                                    <span class="text-2xl text-gray-500">🏋️</span>
+                                </div>
+
+                                <h4 class="font-semibold text-gray-200">
+                                    Nenhum exercício adicionado
+                                </h4>
+
+                                <p class="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-gray-500">
+                                    Selecione um exercício acima e configure suas séries, repetições e carga.
+                                </p>
+
+                            </div>
+
+                        {:else}
+
+                            <!-- Exercícios cadastrados -->
+                            <div class="mt-6 flex flex-col gap-4">
+
+                                {#each exerciciosTreino as exercicio, index}
+
+                                    <div class="group rounded-xl border border-gray-700 bg-gray-900/60 p-4 transition-all duration-200 hover:border-blue-500/40">
+
+                                        <!-- Identificação -->
+                                        <div class="flex items-start justify-between gap-3">
+
+                                            <div class="flex min-w-0 items-start gap-3">
+
+                                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-sm font-bold text-blue-400">
+                                                    {index + 1}
+                                                </div>
+
+                                                <div class="min-w-0">
+
+                                                    <h4 class="font-bold text-white">
+                                                        {exercicio.nome}
+                                                    </h4>
+
+                                                    <div class="mt-2">
+                                                        <Badge color="gray">
+                                                            {exercicio.grupo_muscular}
+                                                        </Badge>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <!-- Remover -->
+                                            <button
+                                                type="button"
+                                                class="shrink-0 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:border-red-500/50 hover:bg-red-500/10"
+                                                onclick={() => removerExercicio(index)}
+                                            >
+                                                Remover
+                                            </button>
+
+                                        </div>
+
+
+                                        <!-- Indicadores -->
+                                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+                                            <div class="rounded-lg border border-gray-700/70 bg-gray-800/70 p-3">
+
+                                                <p class="text-xs text-gray-500">
+                                                    Séries
+                                                </p>
+
+                                                <p class="mt-1 text-lg font-bold text-white">
+                                                    {exercicio.series}
+                                                </p>
+
+                                            </div>
+
+
+                                            <div class="rounded-lg border border-gray-700/70 bg-gray-800/70 p-3">
+
+                                                <p class="text-xs text-gray-500">
+                                                    Repetições
+                                                </p>
+
+                                                <p class="mt-1 text-lg font-bold text-white">
+                                                    {exercicio.repeticoes}
+                                                </p>
+
+                                            </div>
+
+
+                                            <div class="rounded-lg border border-gray-700/70 bg-gray-800/70 p-3">
+
+                                                <p class="text-xs text-gray-500">
+                                                    Carga
+                                                </p>
+
+                                                <p class="mt-1 text-lg font-bold text-white">
+                                                    {exercicio.carga ?? '-'}
+                                                    <span class="text-xs font-medium text-gray-500">
+                                                        kg
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+
+                                            <div class="rounded-lg border border-gray-700/70 bg-gray-800/70 p-3">
+
+                                                <p class="text-xs text-gray-500">
+                                                    Descanso
+                                                </p>
+
+                                                <p class="mt-1 text-lg font-bold text-white">
+                                                    {exercicio.descanso}
+                                                    <span class="text-xs font-medium text-gray-500">
+                                                        s
+                                                    </span>
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- Observação -->
+                                        {#if exercicio.observacao}
+
+                                            <div class="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+
+                                                <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-blue-400">
+                                                    Observação
+                                                </p>
+
+                                                <p class="text-sm leading-relaxed text-gray-300">
+                                                    {exercicio.observacao}
+                                                </p>
+
+                                            </div>
+
+                                        {/if}
+
+                                    </div>
+
+                                {/each}
+
+                            </div>
+
+                        {/if}
+
+
+                        <!-- Salvar plano -->
+                        <div class="mt-6 border-t border-gray-700 pt-5">
+
+                            <div class="mb-4 flex items-center justify-between">
+
+                                <span class="text-sm text-gray-400">
+                                    Total de exercícios
+                                </span>
+
+                                <span class="font-semibold text-white">
+                                    {exerciciosTreino.length}
+                                </span>
+
+                            </div>
+
+                            <Button
+                                color="blue"
+                                class="w-full"
+                                disabled={salvando}
+                                onclick={criarPlano}
+                            >
+                                {#if salvando}
+                                    Salvando plano de treino...
+                                {:else}
+                                    Salvar plano de treino
+                                {/if}
+                            </Button>
+
+                            <p class="mt-3 text-center text-xs text-gray-500">
+                                Confira os dados antes de confirmar o cadastro.
+                            </p>
+
+                        </div>
+
+                    </Card>
+
+                </div>
 
             </div>
 
-          {/if}
-
-          <div class="mt-6 border-t border-gray-200 pt-5">
-
-            <Button
-              color="primary"
-              class="w-full"
-              disabled={salvando}
-              onclick={criarPlano}
-            >
-              {#if salvando}
-                Salvando treino...
-              {:else}
-                Salvar plano de treino
-              {/if}
-            </Button>
-
-          </div>
-
-        </Card>
-
-      </div>
+        {/if}
 
     </div>
-
-  {/if}
 
 </div>

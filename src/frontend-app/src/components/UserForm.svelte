@@ -108,71 +108,168 @@
   }
 </script>
 
+
 <!-- Card do formulário -->
-<Card class="max-w-md mx-auto mt-10 p-0 overflow-hidden shadow-lg border border-gray-200 rounded-lg">
-  <!-- Formulário principal -->
-  <form class="flex flex-col gap-6 p-6" on:submit|preventDefault={handleSubmit}>
-    <!-- Título -->
-    <Heading tag="h3" class="mb-2 text-center">
-      {id === null ? 'Cadastrar Usuário' : 'Editar Usuário'}
+<Card class="mb-8 mx-auto mt-8 w-full max-w-xl overflow-hidden rounded-2xl border border-gray-700 bg-gray-800 p-0 shadow-2xl">
+
+  <!-- Cabeçalho do formulário -->
+  <div class="border-b border-gray-700 bg-gray-950/60 px-6 py-7 sm:px-8">
+
+    <div class="mb-3 flex items-center gap-2">
+      <span class="h-2 w-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></span>
+      <span class="text-xs font-bold uppercase tracking-[0.2em] text-blue-400">
+        Gestão da academia
+      </span>
+    </div>
+
+    <Heading tag="h3" class="text-2xl font-black tracking-tight text-white">
+      {id === null ? 'Cadastrar usuário' : 'Editar usuário'}
+      <span class="text-blue-500">.</span>
     </Heading>
+
+    <p class="mt-2 text-sm text-gray-400">
+      {id === null
+        ? 'Preencha os dados para criar um novo acesso à plataforma.'
+        : 'Atualize as informações e permissões deste usuário.'}
+    </p>
+
+  </div>
+
+  <!-- Formulário principal -->
+  <form class="flex flex-col gap-6 p-6 sm:p-8" on:submit|preventDefault={handleSubmit}>
+
     <!-- Mensagem de erro -->
     {#if error}
-      <div class="text-red-500 text-center">{error}</div>
+      <div class="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-sm font-bold text-red-400">!</span>
+        <p class="text-sm font-medium leading-relaxed text-red-300">{error}</p>
+      </div>
     {/if}
-    <!-- Campo login -->
+
+    <!-- Login -->
     <div>
-      <Label for="login">Login</Label>
-      <Input id="login" bind:value={user.login} placeholder="Digite o login" required class="mt-1" />
+      <Label for="login" class="mb-2 block text-sm font-semibold text-gray-200">
+        Login
+      </Label>
+
+      <Input
+        id="login"
+        bind:value={user.login}
+        placeholder="Digite o login"
+        required
+        class="mt-1"
+      />
+
       {#if errorOf('login')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('login')}</div>
+        <p class="mt-2 text-xs font-medium text-red-400">{errorOf('login')}</p>
       {/if}
     </div>
-    <!-- Campo email -->
+
+    <!-- Email -->
     <div>
-      <Label for="email">Email</Label>
-      <Input id="email" type="email" bind:value={user.email} placeholder="Digite o e-mail" required class="mt-1" />
+      <Label for="email" class="mb-2 block text-sm font-semibold text-gray-200">
+        E-mail
+      </Label>
+
+      <Input
+        id="email"
+        type="email"
+        bind:value={user.email}
+        placeholder="Digite o endereço de e-mail"
+        required
+        class="mt-1"
+      />
+
       {#if errorOf('email')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('email')}</div>
+        <p class="mt-2 text-xs font-medium text-red-400">{errorOf('email')}</p>
       {/if}
     </div>
-    <!-- Campo senha -->
+
+    <!-- Senha -->
     <div>
-      <Label for="senha">Senha {id !== null ? '(deixe vazio para manter atual)' : ''}</Label>
-      <Input 
-        id="senha" 
-        type="password" 
-        bind:value={user.senha} 
-        placeholder={id === null ? 'Digite a senha (mínimo 6 caracteres)' : 'Nova senha (opcional)'} 
+      <Label for="senha" class="mb-2 block text-sm font-semibold text-gray-200">
+        Senha
+      </Label>
+
+      <Input
+        id="senha"
+        type="password"
+        bind:value={user.senha}
+        placeholder={id === null ? 'Mínimo de 6 caracteres' : 'Nova senha (opcional)'}
         required={id === null}
         minlength={6}
-        class="mt-1" 
+        class="mt-1"
       />
+
+      {#if id !== null}
+        <p class="mt-2 text-xs text-gray-500">
+          Deixe em branco para manter a senha atual.
+        </p>
+      {/if}
+
       {#if errorOf('senha')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('senha')}</div>
+        <p class="mt-2 text-xs font-medium text-red-400">{errorOf('senha')}</p>
       {/if}
     </div>
-    <!-- Campo role -->
+
+    <!-- Perfil -->
     <div>
-      <Label for="role">Perfil</Label>
-      <Select id="role" bind:value={user.role} items={roleOptions} class="mt-1" />
+      <Label for="role" class="mb-2 block text-sm font-semibold text-gray-200">
+        Perfil de acesso
+      </Label>
+
+      <Select
+        id="role"
+        bind:value={user.role}
+        items={roleOptions}
+        class="mt-1"
+      />
+
       {#if errorOf('role')}
-        <div class="mt-1 text-sm text-red-500">{errorOf('role')}</div>
+        <p class="mt-2 text-xs font-medium text-red-400">{errorOf('role')}</p>
       {/if}
     </div>
-    
-    <!-- Botões de ação -->
-    <div class="flex gap-4 justify-end mt-4">
-      <!-- Botão cancelar/voltar -->
-      <Button color="light" type="button" onclick={handleCancel} disabled={loading}>
-        <ArrowLeftOutline class="inline w-5 h-5 mr-2 align-text-bottom" />
+
+    <!-- Separador -->
+    <div class="border-t border-gray-700"></div>
+
+    <!-- Botões -->
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+
+      <Button
+        color="light"
+        type="button"
+        onclick={handleCancel}
+        disabled={loading}
+        class="justify-center"
+      >
+        <ArrowLeftOutline class="mr-2 h-5 w-5" />
         {id === null ? 'Voltar' : 'Cancelar'}
       </Button>
-      <!-- Botão salvar -->
-      <Button type="submit" color="primary" disabled={loading}>
-        <FloppyDiskAltOutline class="inline w-5 h-5 mr-2 align-text-bottom" />
-        {id === null ? 'Cadastrar' : 'Salvar'}
+
+      <Button
+        type="submit"
+        color="primary"
+        disabled={loading}
+        class="justify-center"
+      >
+        <FloppyDiskAltOutline class="mr-2 h-5 w-5" />
+        {#if loading}
+          Salvando...
+        {:else}
+          {id === null ? 'Cadastrar usuário' : 'Salvar alterações'}
+        {/if}
       </Button>
+
     </div>
+
   </form>
+
+  <!-- Rodapé -->
+  <div class="border-t border-gray-700 bg-gray-950/40 px-6 py-3 sm:px-8">
+    <p class="text-center text-xs text-gray-500">
+      Sistema de gerenciamento da academia
+    </p>
+  </div>
+
 </Card>
