@@ -19,7 +19,7 @@
 ## Descrição dos Casos de Uso
 
 ### CDU 01 – Realizar cadastro e login no sistema
-![](diagramas/)
+![](diagramas/CadastroLogin.drawio.png)
 
 O usuário realiza seu cadastro na plataforma ou acessa sua conta utilizando suas credenciais.
 
@@ -310,4 +310,5 @@ O administrador realiza o gerenciamento das modalidades oferecidas pela academia
 4. O sistema solicita a confirmação da exclusão, caso disponível.
 5. O administrador confirma a operação.
 6. O sistema remove a modalidade e atualiza a listagem.
+
 
