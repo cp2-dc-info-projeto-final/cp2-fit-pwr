@@ -19,6 +19,7 @@
 ## Descrição dos Casos de Uso
 
 ### CDU 01 – Realizar cadastro e login no sistema
+![](diagramas/)
 
 O usuário realiza seu cadastro na plataforma ou acessa sua conta utilizando suas credenciais.
 
@@ -63,6 +64,7 @@ O usuário realiza seu cadastro na plataforma ou acessa sua conta utilizando sua
 ---
 
 ### CDU 02 – Realizar matrícula na academia
+![](diagramas/RealizarMatricula.drawio.png)
 
 O aluno realiza sua matrícula para ter acesso aos serviços e atividades oferecidos pela academia.
 
@@ -100,6 +102,7 @@ O aluno realiza sua matrícula para ter acesso aos serviços e atividades oferec
 ---
 
 ### CDU 03 – Consultar aulas e realizar inscrição em turmas
+![](diagramas/diagra_de_sequencia3.svg)
 
 O aluno consulta as aulas disponíveis e pode realizar sua inscrição nas turmas oferecidas pela academia.
 
@@ -138,6 +141,7 @@ O aluno consulta as aulas disponíveis e pode realizar sua inscrição nas turma
 ---
 
 ### CDU 04 – Gerenciar aulas e turmas
+![](diagramas/diagra_de_sequencia4.svg)
 
 O professor ou administrador realiza o gerenciamento das aulas e turmas disponíveis na academia.
 
@@ -187,6 +191,7 @@ O professor ou administrador realiza o gerenciamento das aulas e turmas disponí
 ---
 
 ### CDU 05 – Criar e gerenciar planos de treino
+![](diagramas/PlanosTreino.drawio.png)
 
 O professor ou administrador cria planos de treino para os alunos, adicionando os exercícios que deverão ser realizados.
 
@@ -229,6 +234,7 @@ O professor ou administrador cria planos de treino para os alunos, adicionando o
 ---
 
 ### CDU 06 – Gerenciar usuários
+![](diagramas/GerenciarUsuario.drawio.png)
 
 O administrador realiza o gerenciamento das contas cadastradas na plataforma.
 
@@ -266,6 +272,7 @@ O administrador realiza o gerenciamento das contas cadastradas na plataforma.
 ---
 
 ### CDU 07 – Gerenciar modalidades
+![](diagramas/GerenciarModalidades.drawio.png)
 
 O administrador realiza o gerenciamento das modalidades oferecidas pela academia.
 
@@ -303,3 +310,4 @@ O administrador realiza o gerenciamento das modalidades oferecidas pela academia
 4. O sistema solicita a confirmação da exclusão, caso disponível.
 5. O administrador confirma a operação.
 6. O sistema remove a modalidade e atualiza a listagem.
+
